@@ -1,4 +1,4 @@
-import 'package:callerxyz/shared/widgets/colors.dart';
+import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

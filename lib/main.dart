@@ -1,7 +1,7 @@
 import 'package:callerxyz/onboarding_page.dart';
-import 'package:callerxyz/riverpod/fcm_init.dart';
-import 'package:callerxyz/shared/screens/home_screen.dart';
-import 'package:callerxyz/shared/widgets/colors.dart';
+import 'package:callerxyz/modules/home/screens/home_screen.dart';
+import 'package:callerxyz/modules/shared/widgets/colors.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +12,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp();
-  await FirebaseFcmManager().initFcmToken();
+  await FirebaseMessaging.instance.requestPermission();
+  await FirebaseMessaging.instance.getToken();
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_ANON']!,

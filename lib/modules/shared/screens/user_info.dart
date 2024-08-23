@@ -1,8 +1,8 @@
 import 'package:callerxyz/riverpod/fcm_init.dart';
-import 'package:callerxyz/shared/screens/home_screen.dart';
-import 'package:callerxyz/shared/widgets/custom_buttons.dart';
-import 'package:callerxyz/shared/widgets/snackbars.dart';
-import 'package:callerxyz/shared/widgets/textfields.dart';
+import 'package:callerxyz/modules/home/screens/home_screen.dart';
+import 'package:callerxyz/modules/shared/widgets/custom_buttons.dart';
+import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
+import 'package:callerxyz/modules/shared/widgets/textfields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -31,7 +31,7 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
     });
     FocusManager.instance.primaryFocus!.unfocus();
     //upload user data to the database
-    String fcmToken = await FirebaseFcmManager().initFcmToken();
+    String fcmToken = await FirebaseFcmManager().getFcmToken();
     supbase.from('users').insert({
       "name": capitalizeFirstLetter(_nameController.text.trim()),
       "email": _emailController.text.trim().toLowerCase(),

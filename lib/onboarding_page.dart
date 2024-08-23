@@ -1,7 +1,7 @@
-import 'package:callerxyz/shared/screens/home_screen.dart';
-import 'package:callerxyz/shared/widgets/colors.dart';
-import 'package:callerxyz/shared/widgets/custom_buttons.dart';
-import 'package:callerxyz/shared/widgets/snackbars.dart';
+import 'package:callerxyz/modules/home/screens/home_screen.dart';
+import 'package:callerxyz/modules/shared/widgets/colors.dart';
+import 'package:callerxyz/modules/shared/widgets/custom_buttons.dart';
+import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

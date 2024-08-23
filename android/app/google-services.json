@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "127452858796",
+    "project_id": "callerxyz-d978c",
+    "storage_bucket": "callerxyz-d978c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:127452858796:android:9e640dc6fd79cf97225209",
+        "android_client_info": {
+          "package_name": "com.app.callerxyz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "127452858796-iqdqqqm7t61odt68n2l3ske381rpucfr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.callerxyz",
+            "certificate_hash": "492fe49c6fd19179f7a11090326d56fdc58f1bff"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDph8tbPrxnx3gkE5E1Igna0KHwHpWVfQc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "127452858796-q1oqfkjdblt61hbmjpqu9vl67okka5i3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.app.callerxyz.callerxyz"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

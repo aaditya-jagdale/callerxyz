@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RecordDetails extends ConsumerStatefulWidget {
   final RecordModel? record;
@@ -21,6 +22,7 @@ class RecordDetails extends ConsumerStatefulWidget {
 class _RecordDetailsState extends ConsumerState<RecordDetails> {
   final _controller = TextEditingController();
   bool _loading = true;
+  final supabase = Supabase.instance.client;
 
   infoBottomSheet() {
     showModalBottomSheet(
@@ -172,34 +174,23 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
 
   @override
   void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.record != null) {
-        ref.read(recordDataController.notifier).updateDate(widget.record!.date);
         ref
             .read(recordDataController.notifier)
-            .updateTotalDialed(widget.record!.dialed);
-        ref
-            .read(recordDataController.notifier)
-            .updateConnected(widget.record!.connected);
-        ref
-            .read(recordDataController.notifier)
-            .updateCallbackReq(widget.record!.callbacks);
-        ref
-            .read(recordDataController.notifier)
-            .updateMeetings(widget.record!.meetings);
-        ref
-            .read(recordDataController.notifier)
-            .updateConversions(widget.record!.conversions);
+            .initializeRecord(widget.record!);
       }
       setState(() {
         _loading = false;
       });
     });
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final recordData = ref.watch(recordDataController);
+
     return Scaffold(
       appBar: _loading
           ? null
@@ -207,8 +198,8 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
               automaticallyImplyLeading: true,
               titleSpacing: 0,
               title: Text(
-                DateFormat('MMM dd, yyyy').format(
-                    DateTime.parse(ref.read(recordDataController).date)),
+                DateFormat('MMM dd, yyyy')
+                    .format(DateTime.parse(recordData.date)),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
@@ -243,7 +234,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                     ),
                     title: "Total Dialed",
                     textWidget: Text(
-                      ref.watch(recordDataController).totalDialed.toString(),
+                      recordData.totalDialed.toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -253,17 +244,17 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                       updateValueBottomSheet(
                         onTap: () {
                           ref
-                              .watch(recordDataController.notifier)
+                              .read(recordDataController.notifier)
                               .updateTotalDialed(int.parse(_controller.text));
                           Navigator.pop(context);
                         },
                       );
                     },
                     onIncremenet: () => ref
-                        .watch(recordDataController.notifier)
+                        .read(recordDataController.notifier)
                         .dialedIncrement(),
                     onDecrement: () => ref
-                        .watch(recordDataController.notifier)
+                        .read(recordDataController.notifier)
                         .dialedDecrement(),
                   ),
 
@@ -276,7 +267,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                     ),
                     title: "Connected",
                     textWidget: Text(
-                      ref.watch(recordDataController).connected.toString(),
+                      recordData.connected.toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -286,17 +277,17 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                       updateValueBottomSheet(
                         onTap: () {
                           ref
-                              .watch(recordDataController.notifier)
+                              .read(recordDataController.notifier)
                               .updateConnected(int.parse(_controller.text));
                           Navigator.pop(context);
                         },
                       );
                     },
                     onIncremenet: () => ref
-                        .watch(recordDataController.notifier)
+                        .read(recordDataController.notifier)
                         .connectedIncrement(),
                     onDecrement: () => ref
-                        .watch(recordDataController.notifier)
+                        .read(recordDataController.notifier)
                         .connectedDecrement(),
                   ),
 
@@ -312,42 +303,32 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                   ),
 
                   //call-to-connect
-                  Row(
-                    children: [
-                      const Text(
-                        "Dial-to-Connect",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      children: [
+                        const Text(
+                          "Dial-to-Connect",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.info_outline_rounded,
-                          size: 20,
+                        const Spacer(),
+                        Text(
+                          "${(recordData.dialToConnect * 100).toStringAsFixed(1)}%",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: (recordData.dialToConnect * 100) <= 10
+                                ? CustomColors.red
+                                : (recordData.dialToConnect * 100) <= 25
+                                    ? CustomColors.yellow
+                                    : CustomColors.green,
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "${(ref.watch(recordDataController).dialToConnect * 100).toStringAsFixed(1)}%",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: (ref
-                                          .watch(recordDataController)
-                                          .dialToConnect *
-                                      100) <=
-                                  10
-                              ? CustomColors.red
-                              : (ref.watch(recordDataController).dialToConnect *
-                                          100) <=
-                                      25
-                                  ? CustomColors.yellow
-                                  : CustomColors.green,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
                   const Padding(
@@ -370,7 +351,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                     ),
                     title: "Meetings",
                     textWidget: Text(
-                      ref.watch(recordDataController).meetings.toString(),
+                      recordData.meetings.toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -380,17 +361,17 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                       updateValueBottomSheet(
                         onTap: () {
                           ref
-                              .watch(recordDataController.notifier)
+                              .read(recordDataController.notifier)
                               .updateMeetings(int.parse(_controller.text));
                           Navigator.pop(context);
                         },
                       );
                     },
                     onIncremenet: () => ref
-                        .watch(recordDataController.notifier)
+                        .read(recordDataController.notifier)
                         .meetingsIncrement(),
                     onDecrement: () => ref
-                        .watch(recordDataController.notifier)
+                        .read(recordDataController.notifier)
                         .meetingsDecrement(),
                   ),
 
@@ -403,7 +384,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                     ),
                     title: "Conversions",
                     textWidget: Text(
-                      ref.watch(recordDataController).conversions.toString(),
+                      recordData.conversions.toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -413,17 +394,17 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                       updateValueBottomSheet(
                         onTap: () {
                           ref
-                              .watch(recordDataController.notifier)
+                              .read(recordDataController.notifier)
                               .updateConversions(int.parse(_controller.text));
                           Navigator.pop(context);
                         },
                       );
                     },
                     onIncremenet: () => ref
-                        .watch(recordDataController.notifier)
+                        .read(recordDataController.notifier)
                         .conversionsIncrement(),
                     onDecrement: () => ref
-                        .watch(recordDataController.notifier)
+                        .read(recordDataController.notifier)
                         .conversionsDecrement(),
                   ),
 
@@ -439,79 +420,61 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                   ),
 
                   //connect to meet
-                  Row(
-                    children: [
-                      const Text(
-                        "Connect-to-Meet",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      children: [
+                        const Text(
+                          "Connect-to-Meet",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.info_outline_rounded,
-                          size: 20,
+                        const Spacer(),
+                        Text(
+                          "${(recordData.connectToMeeting * 100).toStringAsFixed(1)}%",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: recordData.connectToMeeting >= 0.25
+                                ? CustomColors.green
+                                : recordData.connectToMeeting >= 0.1
+                                    ? CustomColors.yellow
+                                    : CustomColors.red,
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "${(ref.watch(recordDataController).connectToMeeting * 100).toStringAsFixed(1)}%",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: ref
-                                      .watch(recordDataController)
-                                      .connectToMeeting >=
-                                  0.25
-                              ? CustomColors.green
-                              : ref
-                                          .watch(recordDataController)
-                                          .connectToMeeting >=
-                                      0.1
-                                  ? CustomColors.yellow
-                                  : CustomColors.red,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
                   //dial to meet
-                  Row(
-                    children: [
-                      const Text(
-                        "Dial-to-Meet",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      children: [
+                        const Text(
+                          "Dial-to-Meet",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.info_outline_rounded,
-                          size: 20,
+                        const Spacer(),
+                        Text(
+                          "${(recordData.dialToMeeting * 100).toStringAsFixed(1)}%",
+                          style: TextStyle(
+                            color: recordData.dialToMeeting >= 0.25
+                                ? CustomColors.green
+                                : recordData.dialToMeeting >= 0.10
+                                    ? CustomColors.yellow
+                                    : CustomColors.red,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "${(ref.watch(recordDataController).dialToMeeting * 100).toStringAsFixed(1)}%",
-                        style: TextStyle(
-                          color: ref
-                                      .watch(recordDataController)
-                                      .dialToMeeting >=
-                                  0.25
-                              ? CustomColors.green
-                              : ref.watch(recordDataController).dialToMeeting >=
-                                      0.10
-                                  ? CustomColors.yellow
-                                  : CustomColors.red,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
                   const Padding(
@@ -533,7 +496,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                     ),
                     title: "Callbacks",
                     textWidget: Text(
-                      ref.watch(recordDataController).callbackReq.toString(),
+                      recordData.callbackReq.toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -543,7 +506,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                       updateValueBottomSheet(
                         onTap: () {
                           ref
-                              .watch(recordDataController.notifier)
+                              .read(recordDataController.notifier)
                               .updateCallbackReq(int.parse(_controller.text));
                           _controller.clear();
                           Navigator.pop(context);
@@ -551,10 +514,10 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                       );
                     },
                     onIncremenet: () => ref
-                        .watch(recordDataController.notifier)
+                        .read(recordDataController.notifier)
                         .callbackReqIncrement(),
                     onDecrement: () => ref
-                        .watch(recordDataController.notifier)
+                        .read(recordDataController.notifier)
                         .callbackReqDecrement(),
                   ),
 
@@ -594,9 +557,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                                 duration: const Duration(milliseconds: 250),
                                 tween: Tween<double>(
                                     begin: 0,
-                                    end: ref
-                                        .watch(recordDataController)
-                                        .meetingToConversion),
+                                    end: recordData.meetingToConversion),
                                 builder: (context, value, _) =>
                                     CircularProgressIndicator(
                                   value: value,
@@ -615,10 +576,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                                   duration: const Duration(milliseconds: 250),
                                   tween: Tween<double>(
                                     begin: 0,
-                                    end: ref
-                                            .watch(recordDataController)
-                                            .meetingToConversion *
-                                        100,
+                                    end: recordData.meetingToConversion * 100,
                                   ),
                                   builder: (context, value, _) => Text(
                                     "${value.toStringAsFixed(0)}%",

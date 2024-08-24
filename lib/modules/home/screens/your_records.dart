@@ -3,6 +3,7 @@ import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class YourRecordSection extends StatefulWidget {
@@ -98,6 +99,28 @@ class _YourRecordSectionState extends State<YourRecordSection> {
                 ),
               ],
             )),
+          ),
+        if (  _loading)
+          Expanded(
+            child: ListView.builder(
+              itemCount: 5, // Arbitrary number of shimmer tiles
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         if (!_loading && records.isNotEmpty)
           Expanded(

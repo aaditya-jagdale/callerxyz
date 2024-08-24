@@ -1,3 +1,4 @@
+import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -49,6 +50,17 @@ class RecordState {
 
 class RecordDataProvider extends StateNotifier<RecordState> {
   RecordDataProvider() : super(RecordState());
+
+  void initializeRecord(RecordModel record) {
+    state = RecordState(
+      date: record.date,
+      totalDialed: record.dialed,
+      connected: record.connected,
+      callbackReq: record.callbacks,
+      meetings: record.meetings,
+      conversions: record.conversions,
+    );
+  }
 
   void updateDate(String newDate) {
     state = state.copyWith(date: newDate);

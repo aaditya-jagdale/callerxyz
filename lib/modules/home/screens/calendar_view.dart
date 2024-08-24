@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -115,7 +114,9 @@ class _CallendarViewState extends State<CallendarView> {
               ),
               itemCount: 365,
               itemBuilder: (context, index) {
-                bool isSuccessful = dates.contains(index - 1);
+                int today = DateTime.now().weekday - 1;
+                bool isSuccessful = dates.contains(index - today);
+
                 if (mounted) {
                   return Container(
                     height: 10,

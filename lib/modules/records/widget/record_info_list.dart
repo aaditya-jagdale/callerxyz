@@ -29,48 +29,51 @@ class _RecordInfoListState extends ConsumerState<RecordInfoList> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onTap,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: CustomColors.black10,
-                    borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: CustomColors.black10,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: widget.icon,
                   ),
-                  child: widget.icon,
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: widget.onDecrement,
+                  icon: const Icon(Icons.remove),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
-                )
+                widget.textWidget,
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: widget.onIncremenet,
+                  icon: const Icon(Icons.add),
+                ),
               ],
             ),
-          ),
-          Row(
-            children: [
-              IconButton(
-                onPressed: widget.onDecrement,
-                icon: const Icon(Icons.remove),
-              ),
-              const SizedBox(width: 8),
-              widget.textWidget,
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: widget.onIncremenet,
-                icon: const Icon(Icons.add),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:callerxyz/modules/home/widgets/record_card.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
+import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -22,14 +23,21 @@ class _YourRecordSectionState extends State<YourRecordSection> {
         .select()
         .eq("uid", supabase.auth.currentUser!.id)
         .select()
+        .order('date')
         .then((results) {
       debugPrint("${results.length} records fetched");
       setState(() {
         records = results.map((e) => RecordModel.fromJson(e)).toList();
       });
-    });
-    setState(() {
-      _loading = false;
+      setState(() {
+        _loading = false;
+      });
+    }).onError((error, stackTrace) {
+      debugPrint("Error fetching records: $error");
+      errorSnackBar(context, "Error fetching records");
+      setState(() {
+        _loading = false;
+      });
     });
   }
 
@@ -64,7 +72,7 @@ class _YourRecordSectionState extends State<YourRecordSection> {
           ],
         ),
         const SizedBox(height: 10),
-        if (records.isEmpty)
+        if (records.isEmpty && !_loading)
           Expanded(
             child: Center(
                 child: Column(
@@ -92,13 +100,14 @@ class _YourRecordSectionState extends State<YourRecordSection> {
             )),
           ),
         if (!_loading && records.isNotEmpty)
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: records.length,
-            itemBuilder: (context, index) {
-              final record = records[index];
-              return RecordCard(record: record);
-            },
+          Expanded(
+            child: ListView.builder(
+              itemCount: records.length,
+              itemBuilder: (context, index) {
+                final record = records[index];
+                return RecordCard(record: record);
+              },
+            ),
           ),
       ],
     );

@@ -9,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final String? icon;
   final int? maxLines;
   final String? errorText;
+  final TextInputType keyboardType;
   const CustomTextField({
     super.key,
     this.controller,
@@ -17,6 +18,7 @@ class CustomTextField extends StatelessWidget {
     this.icon,
     this.maxLines,
     this.errorText,
+    this.keyboardType = TextInputType.text,
   });
 
   @override
@@ -26,7 +28,7 @@ class CustomTextField extends StatelessWidget {
       alignment: Alignment.center,
       margin: const EdgeInsets.symmetric(vertical: 5),
       child: TextFormField(
-        keyboardType: TextInputType.text,
+        keyboardType: keyboardType,
         textAlign: TextAlign.start,
         maxLines: maxLines,
         controller: controller,

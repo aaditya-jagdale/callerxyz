@@ -5,8 +5,6 @@ import 'package:callerxyz/modules/shared/screens/user_info.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -100,7 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             SizedBox(height: 20),
             //Your Record
-            YourRecordSection(),
+            Expanded(child: YourRecordSection()),
           ],
         ),
       ),

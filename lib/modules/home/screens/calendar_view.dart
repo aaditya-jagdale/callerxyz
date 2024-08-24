@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +16,11 @@ class CallendarView extends StatefulWidget {
 
 class _CallendarViewState extends State<CallendarView> {
   final supabase = Supabase.instance.client;
-  List<DateTime> dates = [];
+  bool _isLoading = true;
+  List<int> dates = [];
+
+  final startDate = DateTime.now().subtract(const Duration(days: 365 - 1));
+
   insertRecord() async {
     final data = await supabase.from('user_records').insert({
       'uid': supabase.auth.currentUser!.id,
@@ -28,7 +33,7 @@ class _CallendarViewState extends State<CallendarView> {
       'conversions': Random().nextInt(10),
     });
 
-    debugPrint("Record Inserted: ${data}");
+    debugPrint("Record Inserted: $data");
   }
 
   getCalendarData() async {
@@ -36,12 +41,16 @@ class _CallendarViewState extends State<CallendarView> {
         .from('user_records')
         .select("date")
         .eq("uid", supabase.auth.currentUser!.id);
+    setState(() {
+      dates = data
+          .map<int>((e) => DateTime.now()
+              .difference(DateTime.parse(e["date"].toString()))
+              .inDays)
+          .toList();
+      _isLoading = false;
+    });
 
-    dates = data
-        .map<DateTime>((e) => DateTime.parse(e["date"].toString()))
-        .toList();
-
-    debugPrint("Calendar Data: $data");
+    debugPrint("Calendar Data: $dates");
   }
 
   @override
@@ -63,16 +72,24 @@ class _CallendarViewState extends State<CallendarView> {
         children: [
           Row(
             children: [
-              GestureDetector(
-                onTap: () => insertRecord(),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: CustomColors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: SvgPicture.asset("assets/bicep.svg"),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: CustomColors.white.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(8),
                 ),
+                child: _isLoading
+                    ? Container(
+                        height: 20,
+                        width: 20,
+                        alignment: Alignment.center,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 3,
+                          strokeCap: StrokeCap.round,
+                          color: CustomColors.white,
+                        ),
+                      )
+                    : SvgPicture.asset("assets/bicep.svg"),
               ),
               const SizedBox(width: 8),
               const Text(
@@ -86,28 +103,34 @@ class _CallendarViewState extends State<CallendarView> {
             ],
           ),
           const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(
-                40,
-                (index) => Column(
-                  children: List.generate(
-                    7,
-                    (index) => Container(
-                      height: 10,
-                      width: 10,
-                      decoration: BoxDecoration(
-                        color: CustomColors.black25.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      margin: const EdgeInsets.all(3),
-                    ),
-                  ),
-                ),
+          SizedBox(
+            height: 108,
+            child: GridView.builder(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 7,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
               ),
+              itemCount: 365,
+              itemBuilder: (context, index) {
+                bool isSuccessful = dates.contains(index - 1);
+                if (mounted) {
+                  return Container(
+                    height: 10,
+                    width: 10,
+                    decoration: BoxDecoration(
+                      color: isSuccessful
+                          ? CustomColors.black25
+                          : CustomColors.black25.withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  );
+                }
+              },
             ),
-          )
+          ),
         ],
       ),
     );

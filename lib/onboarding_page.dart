@@ -30,7 +30,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     )
         .then((response) {
       if (response.user == null) return;
-      final Session? session = response.session;
+      // final Session? session = response.session;
       final User? user = response.user;
       Navigator.pushReplacement(
         context,
@@ -38,10 +38,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           builder: (context) => const HomeScreen(checkUser: true),
         ),
       );
-      debugPrint('/////User: ${user!.toJson().toString()}');
     }).onError((AuthException error, stackTrace) {
-      debugPrint('/////Error: ${error.message}');
-
       if (error.code == "email_exists") {
         signIn();
       } else if (error.code == "over_email_send_rate_limit") {
@@ -63,9 +60,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
       password: _passowordController.text.trim(),
     )
         .then((res) {
-      final Session? session = res.session;
-      final User? user = res.user;
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -73,8 +67,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         ),
       );
     }).onError((AuthException? error, stacktrace) {
-      debugPrint('/////Error: ${error!.message}');
-      if (error.message == "Invalid login credentials") {
+      if (error!.message == "Invalid login credentials") {
         errorSnackBar(context, "Invalid login credentials");
       } else {}
       setState(() {

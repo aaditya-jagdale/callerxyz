@@ -2,8 +2,9 @@ import 'package:callerxyz/modules/records/screens/record_details.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
+import 'package:callerxyz/modules/shared/widgets/transitions.dart';
 import 'package:callerxyz/riverpod/record_data.dart';
-import 'package:callerxyz/riverpod/your_records.dart';
+import 'package:callerxyz/riverpod/records_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -34,13 +35,11 @@ class _RecordCardState extends ConsumerState<RecordCard> {
         .eq('id', widget.record.id)
         .select()
         .then((value) {
-          debugPrint("Updated record: $value");
           ref
               .read(yourRecordsProvider.notifier)
               .updateRecord(RecordModel.fromJson(value[0]));
         })
         .onError((error, stackTrace) {
-          debugPrint("Error updating record: $error");
           errorSnackBar(context, "Error updating record");
         });
   }
@@ -49,11 +48,8 @@ class _RecordCardState extends ConsumerState<RecordCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => RecordDetails(record: widget.record)))
-            .then((value) {
+        rightSlideTransition(context, RecordDetails(record: widget.record),
+            onComplete: () {
           updateSupabase();
         });
       },

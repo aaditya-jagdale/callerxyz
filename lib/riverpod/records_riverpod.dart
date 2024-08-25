@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
+import 'package:intl/intl.dart';
 
 class RecordState {
   final List<RecordModel> records;
+  final RecordModel todayRecord;
 
-  RecordState({required this.records});
+  RecordState({required this.records, this.todayRecord = const RecordModel()});
 
   List<RecordModel> get sortedRecords {
     return List.from(records)..sort((a, b) => b.date.compareTo(a.date));
@@ -14,8 +16,16 @@ class RecordState {
 class YourRecordsNotifier extends StateNotifier<RecordState> {
   YourRecordsNotifier() : super(RecordState(records: []));
 
+  void setTodayRecord(RecordModel record) {
+    state = RecordState(records: state.records, todayRecord: record);
+  }
+
   void setRecords(List<RecordModel> records) {
-    state = RecordState(records: records);
+    state = RecordState(
+        records: records
+            .where((e) =>
+                e.date != DateFormat('yyyy-MM-dd').format(DateTime.now()))
+            .toList());
   }
 
   void addRecord(RecordModel record) {

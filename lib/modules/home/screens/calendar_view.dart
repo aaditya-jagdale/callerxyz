@@ -17,11 +17,10 @@ class _CallendarViewState extends State<CallendarView> {
   final supabase = Supabase.instance.client;
   bool _isLoading = true;
   List<int> dates = [];
-
   final startDate = DateTime.now().subtract(const Duration(days: 365 - 1));
 
   insertRecord() async {
-    final data = await supabase.from('user_records').insert({
+    await supabase.from('user_records').insert({
       'uid': supabase.auth.currentUser!.id,
       'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
       'day': DateFormat('EEEE').format(DateTime.now()),
@@ -31,15 +30,14 @@ class _CallendarViewState extends State<CallendarView> {
       'meetings': Random().nextInt(10),
       'conversions': Random().nextInt(10),
     });
-
-    debugPrint("Record Inserted: $data");
   }
 
   getCalendarData() async {
     final data = await supabase
         .from('user_records')
         .select("date")
-        .eq("uid", supabase.auth.currentUser!.id);
+        .eq("uid", supabase.auth.currentUser!.id)
+        .neq("dialed", 0);
     setState(() {
       dates = data
           .map<int>((e) => DateTime.now()
@@ -48,8 +46,6 @@ class _CallendarViewState extends State<CallendarView> {
           .toList();
       _isLoading = false;
     });
-
-    debugPrint("Calendar Data: $dates");
   }
 
   @override
@@ -114,7 +110,7 @@ class _CallendarViewState extends State<CallendarView> {
               ),
               itemCount: 365,
               itemBuilder: (context, index) {
-                int today = DateTime.now().weekday - 1;
+                int today = DateTime.now().weekday - 7;
                 bool isSuccessful = dates.contains(index - today);
 
                 if (mounted) {

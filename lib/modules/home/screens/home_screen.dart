@@ -1,4 +1,5 @@
 import 'package:callerxyz/modules/home/screens/calendar_view.dart';
+import 'package:callerxyz/modules/home/screens/profile_page.dart';
 import 'package:callerxyz/modules/home/screens/your_records.dart';
 import 'package:callerxyz/riverpod/fcm_init.dart';
 import 'package:callerxyz/modules/shared/screens/user_info.dart';
@@ -6,6 +7,7 @@ import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final bool checkUser;
@@ -18,17 +20,22 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final supabase = Supabase.instance.client;
 
-  updateFcmToken() async {
-    // String fcmToken = await FirebaseFcmModel().initFcmToken();
-    String fcmToken = await FirebaseFcmManager().getFcmToken();
+  Future<Map<String, dynamic>> getDeviceInfo() async {
+    final deviceInfoPlugin = DeviceInfoPlugin();
+    final deviceInfo = await deviceInfoPlugin.androidInfo;
+    Map<String, dynamic> deviceData = deviceInfo.data;
 
-    final data = await supabase
+    return deviceData;
+  }
+
+  updateFcmToken() async {
+    String fcmToken = await FirebaseFcmManager().getFcmToken();
+    Map<String, dynamic> deviceData = await getDeviceInfo();
+    await supabase
         .from('users')
-        .update({'fcm_token': fcmToken})
+        .update({'fcm_token': fcmToken, 'device_info': deviceData})
         .eq('uid', supabase.auth.currentUser!.id)
         .select("fcm_token");
-
-    debugPrint("FCM Token Updated: $data");
   }
 
   checkUser() async {
@@ -86,20 +93,80 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              showMenu(
+                color: CustomColors.white,
+                context: context,
+                position: const RelativeRect.fromLTRB(100, 90, 15, 0),
+                items: [
+                  const PopupMenuItem(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.analytics_outlined),
+                        SizedBox(width: 10),
+                        Text('Analytics'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfilePage(),
+                        ),
+                      );
+                    },
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.person_outline),
+                        SizedBox(width: 10),
+                        Text('Account'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.logout_outlined,
+                          color: CustomColors.red,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          'Logout',
+                          style: TextStyle(
+                            color: CustomColors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+            icon: const Icon(Icons.more_vert),
+          ),
+        ],
       ),
       body: const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            //Calendar
-            CallendarView(),
-
-            SizedBox(height: 20),
-            //Your Record
-            Expanded(child: YourRecordSection()),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CallendarView(),
+              SizedBox(height: 20),
+              YourRecordSection(),
+              SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );

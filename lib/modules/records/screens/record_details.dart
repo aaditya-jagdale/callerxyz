@@ -2,10 +2,8 @@ import 'package:callerxyz/modules/records/widget/record_info_list.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/custom_buttons.dart';
-import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:callerxyz/modules/shared/widgets/textfields.dart';
 import 'package:callerxyz/riverpod/record_data.dart';
-import 'package:callerxyz/riverpod/your_records.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -191,8 +189,6 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
 
   @override
   Widget build(BuildContext context) {
-    final recordData = ref.watch(recordDataController);
-
     return Scaffold(
       appBar: _loading
           ? null
@@ -200,8 +196,8 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
               automaticallyImplyLeading: true,
               titleSpacing: 0,
               title: Text(
-                DateFormat('MMM dd, yyyy')
-                    .format(DateTime.parse(recordData.date)),
+                DateFormat('MMM dd, yyyy').format(
+                    DateTime.parse(ref.read(recordDataController).date)),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
@@ -236,7 +232,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                     ),
                     title: "Total Dialed",
                     textWidget: Text(
-                      recordData.totalDialed.toString(),
+                      ref.watch(recordDataController).totalDialed.toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -270,7 +266,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                     ),
                     title: "Connected",
                     textWidget: Text(
-                      recordData.connected.toString(),
+                      ref.watch(recordDataController).connected.toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -324,15 +320,22 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                         ),
                         const Spacer(),
                         Text(
-                          "${(recordData.dialToConnect * 100).toStringAsFixed(1)}%",
+                          "${(ref.watch(recordDataController).dialToConnect * 100).toStringAsFixed(1)}%",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: (recordData.dialToConnect * 100) <= 10
-                                ? CustomColors.red
-                                : (recordData.dialToConnect * 100) <= 25
-                                    ? CustomColors.yellow
-                                    : CustomColors.green,
+                            color:
+                                (ref.watch(recordDataController).dialToConnect *
+                                            100) <=
+                                        10
+                                    ? CustomColors.red
+                                    : (ref
+                                                    .read(recordDataController)
+                                                    .dialToConnect *
+                                                100) <=
+                                            25
+                                        ? CustomColors.yellow
+                                        : CustomColors.green,
                           ),
                         ),
                       ],
@@ -359,7 +362,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                     ),
                     title: "Meetings",
                     textWidget: Text(
-                      recordData.meetings.toString(),
+                      ref.watch(recordDataController).meetings.toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -396,7 +399,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                     ),
                     title: "Conversions",
                     textWidget: Text(
-                      recordData.conversions.toString(),
+                      ref.watch(recordDataController).conversions.toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -450,13 +453,19 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                         ),
                         const Spacer(),
                         Text(
-                          "${(recordData.connectToMeeting * 100).toStringAsFixed(1)}%",
+                          "${(ref.watch(recordDataController).connectToMeeting * 100).toStringAsFixed(1)}%",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: recordData.connectToMeeting >= 0.25
+                            color: ref
+                                        .watch(recordDataController)
+                                        .connectToMeeting >=
+                                    0.25
                                 ? CustomColors.green
-                                : recordData.connectToMeeting >= 0.1
+                                : ref
+                                            .read(recordDataController)
+                                            .connectToMeeting >=
+                                        0.1
                                     ? CustomColors.yellow
                                     : CustomColors.red,
                           ),
@@ -479,13 +488,18 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                         ),
                         const Spacer(),
                         Text(
-                          "${(recordData.dialToMeeting * 100).toStringAsFixed(1)}%",
+                          "${(ref.watch(recordDataController).dialToMeeting * 100).toStringAsFixed(1)}%",
                           style: TextStyle(
-                            color: recordData.dialToMeeting >= 0.25
-                                ? CustomColors.green
-                                : recordData.dialToMeeting >= 0.10
-                                    ? CustomColors.yellow
-                                    : CustomColors.red,
+                            color:
+                                ref.watch(recordDataController).dialToMeeting >=
+                                        0.25
+                                    ? CustomColors.green
+                                    : ref
+                                                .watch(recordDataController)
+                                                .dialToMeeting >=
+                                            0.10
+                                        ? CustomColors.yellow
+                                        : CustomColors.red,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -513,7 +527,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                     ),
                     title: "Callbacks",
                     textWidget: Text(
-                      recordData.callbackReq.toString(),
+                      ref.watch(recordDataController).callbackReq.toString(),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -579,7 +593,9 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                                 duration: const Duration(milliseconds: 250),
                                 tween: Tween<double>(
                                     begin: 0,
-                                    end: recordData.meetingToConversion),
+                                    end: ref
+                                        .read(recordDataController)
+                                        .meetingToConversion),
                                 builder: (context, value, _) =>
                                     CircularProgressIndicator(
                                   value: value,
@@ -599,7 +615,10 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                                   duration: const Duration(milliseconds: 250),
                                   tween: Tween<double>(
                                     begin: 0,
-                                    end: recordData.meetingToConversion * 100,
+                                    end: ref
+                                            .read(recordDataController)
+                                            .meetingToConversion *
+                                        100,
                                   ),
                                   builder: (context, value, _) => Text(
                                     "${value.toStringAsFixed(0)}%",

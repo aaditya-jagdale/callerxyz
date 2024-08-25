@@ -48,7 +48,6 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
         ),
       );
     }).onError((error, stackTrace) {
-      debugPrint("Error: $error");
       errorSnackBar(context, "An error occurred. Please try again later");
       setState(() {
         _loading = false;

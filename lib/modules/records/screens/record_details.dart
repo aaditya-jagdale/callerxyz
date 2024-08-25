@@ -140,6 +140,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
   updateValueBottomSheet({Function()? onTap}) {
     showModalBottomSheet(
       context: context,
+      isDismissible: false,
       showDragHandle: true,
       isScrollControlled: true,
       builder: (context) => Padding(

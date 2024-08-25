@@ -1,8 +1,10 @@
 import 'package:callerxyz/modules/home/screens/home_screen.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/custom_buttons.dart';
-import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -15,64 +17,52 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   //vars
   final supabase = Supabase.instance.client;
-  final _emailController = TextEditingController();
-  final _passowordController = TextEditingController();
   bool _loading = false;
-  String? _emailErrorText;
-  String? _passwordErrorText;
 
-  //Google signing
-  Future signUp() async {
-    supabase.auth
-        .signUp(
-      email: _emailController.text.trim(),
-      password: _passowordController.text.trim(),
+  googleSignin() async {
+    String webClientId = dotenv.env['GOOGLE_WEB_CLIENT_ID']!;
+    String iosClientId = dotenv.env['GOOGLE_IOS_CLIENT_ID']!;
+
+    final GoogleSignIn googleSignIn = GoogleSignIn(
+      clientId: iosClientId,
+      serverClientId: webClientId,
+    );
+    final googleUser = await googleSignIn.signIn();
+    final googleAuth = await googleUser!.authentication;
+    final accessToken = googleAuth.accessToken;
+    final idToken = googleAuth.idToken;
+
+    if (accessToken == null) {
+      throw 'No Access Token found.';
+    }
+    if (idToken == null) {
+      throw 'No ID Token found.';
+    }
+
+    await supabase.auth
+        .signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+      accessToken: accessToken,
     )
-        .then((response) {
-      if (response.user == null) return;
-      // final Session? session = response.session;
-      final User? user = response.user;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomeScreen(checkUser: true),
-        ),
-      );
-    }).onError((AuthException error, stackTrace) {
-      if (error.code == "email_exists") {
-        signIn();
-      } else if (error.code == "over_email_send_rate_limit") {
-        errorSnackBar(context,
-            "We are experiencing a high volume of requests. Please try again later.");
-      }
-      throw error;
-    });
-
-    setState(() {
-      _loading = false;
-    });
-  }
-
-  Future signIn() async {
-    supabase.auth
-        .signInWithPassword(
-      email: _emailController.text.trim(),
-      password: _passowordController.text.trim(),
-    )
-        .then((res) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
-        ),
-      );
-    }).onError((AuthException? error, stacktrace) {
-      if (error!.message == "Invalid login credentials") {
-        errorSnackBar(context, "Invalid login credentials");
-      } else {}
+        .then((value) async {
       setState(() {
         _loading = false;
       });
+
+      await supabase.from('users').insert({
+        'uid': supabase.auth.currentUser!.id,
+        'email': googleUser.email,
+        'name': googleUser.displayName,
+        'photo_url': googleUser.photoUrl,
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      }).then(
+        (value) => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        ),
+      );
     });
   }
 
@@ -129,94 +119,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
             if (!_loading)
               Column(
                 children: [
-                  TextField(
-                    controller: _emailController,
-                    onChanged: (value) {
-                      setState(() {
-                        _emailErrorText = null;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      errorText: _emailErrorText,
-                      hintText: 'example@gmail.com',
-                      hintStyle: const TextStyle(
-                        color: CustomColors.black50,
-                        fontWeight: FontWeight.normal,
-                      ),
-                      filled: true,
-                      fillColor: CustomColors.black10,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: CustomColors.red,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 16),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _passowordController,
-                    onChanged: (value) {
-                      setState(() {
-                        _passwordErrorText = null;
-                      });
-                    },
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      errorText: _passwordErrorText,
-                      hintText: 'Minimum 6 characters',
-                      hintStyle: const TextStyle(
-                        color: CustomColors.black50,
-                        fontWeight: FontWeight.normal,
-                      ),
-                      filled: true,
-                      fillColor: CustomColors.black10,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: CustomColors.red,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
                   CustomPrimaryButton(
-                    title: "Sign Up",
-                    onTap: () {
-                      if (!(_emailController.text.trim().contains("@") &&
-                          _emailController.text.trim().contains("."))) {
-                        setState(() {
-                          _emailErrorText = 'Email is invalid';
-                        });
-                      }
-                      if (_emailController.text.trim().isEmpty) {
-                        setState(() {
-                          _emailErrorText = 'Email is required';
-                        });
-                      } else if (_passowordController.text.trim().isEmpty) {
-                        setState(() {
-                          _passwordErrorText = 'Password is required';
-                        });
-                      } else {
-                        setState(() {
-                          _loading = true;
-                        });
-                        signIn();
-                      }
+                    btnIcon: SvgPicture.asset(
+                      'assets/google.svg',
+                      width: 20,
+                      height: 20,
+                    ),
+                    title: "Start tracking",
+                    onTap: () async {
+                      setState(() {
+                        _loading = true;
+                      });
+                      googleSignin();
                     },
                   ),
                 ],

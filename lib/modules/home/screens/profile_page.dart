@@ -1,8 +1,11 @@
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
+import 'package:callerxyz/modules/shared/widgets/custom_buttons.dart';
+import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:callerxyz/modules/shared/widgets/textfields.dart';
 import 'package:callerxyz/onboarding_page.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -16,6 +19,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
+  bool _resettingPassword = false;
   final supabase = Supabase.instance.client;
 
   getUserData() {
@@ -30,6 +34,81 @@ class _ProfilePageState extends State<ProfilePage> {
         _locationController.text = data[0]['location'] ?? '';
       }
     });
+  }
+
+  Future<void> _sendPasswordRecoveryEmail() async {
+    setState(() {
+      _resettingPassword = true;
+    });
+
+    await supabase.auth
+        .resetPasswordForEmail(_emailController.text.trim())
+        .then((value) {
+      setState(() {
+        _resettingPassword = false;
+      });
+      successSnackBar(context, 'Link has been sent to your email');
+    }).onError((error, stackTrace) {
+      setState(() {
+        _resettingPassword = false;
+      });
+      errorSnackBar(context, error.toString());
+    });
+  }
+
+  updateValueBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) {
+        TextEditingController _emailController = TextEditingController();
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Wrap(
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CustomTextField(
+                    controller: _emailController,
+                    title: "Update Email",
+                  ),
+                  const SizedBox(height: 10),
+                  CustomPrimaryButton(
+                    title: "Change",
+                    onTap: () async {
+                      if (_emailController.text.trim().isNotEmpty &&
+                          _emailController.text.trim().contains('@') &&
+                          _emailController.text.trim().contains('.')) {
+                        await supabase.auth
+                            .updateUser(
+                          UserAttributes(email: _emailController.text.trim()),
+                        )
+                            .then((value) {
+                          {
+                            successSnackBar(context, 'Email updated');
+                            Navigator.pop(context);
+                          }
+                        }).onError((error, stackTrace) {
+                          errorSnackBar(context, error.toString());
+                          Navigator.pop(context);
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              )
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -56,10 +135,15 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             CustomTextField(title: 'Name', controller: _nameController),
-            CustomTextField(
-              title: 'Email',
-              controller: _emailController,
-              isEnabled: false,
+            GestureDetector(
+              onTap: () {
+                updateValueBottomSheet();
+              },
+              child: CustomTextField(
+                title: 'Email',
+                controller: _emailController,
+                isEnabled: false,
+              ),
             ),
             CustomTextField(
               title: 'Location',
@@ -119,12 +203,23 @@ class _ProfilePageState extends State<ProfilePage> {
                   backgroundColor: CustomColors.black10,
                   alignment: Alignment.centerLeft,
                 ),
-                onPressed: () {},
-                child: const Row(
+                onPressed: () {
+                  _sendPasswordRecoveryEmail();
+                },
+                child: Row(
                   children: [
-                    Icon(Icons.lock_outline),
-                    SizedBox(width: 8),
-                    Text(
+                    if (_resettingPassword)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: CustomColors.black,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    if (!_resettingPassword) const Icon(Icons.lock_outline),
+                    const SizedBox(width: 8),
+                    const Text(
                       'Reset Password',
                       style: TextStyle(
                         fontSize: 16,
@@ -133,16 +228,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ],
                 ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 6),
-              child: DottedLine(
-                dashColor: CustomColors.black50,
-                dashGapLength: 4,
-                dashLength: 4,
-                lineThickness: 1,
-                dashRadius: 0,
               ),
             ),
             const Spacer(),
@@ -157,10 +242,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  backgroundColor: CustomColors.red10,
+                  backgroundColor: CustomColors.red20,
                   alignment: Alignment.centerLeft,
                 ),
                 onPressed: () {
+                  GoogleSignIn().signOut();
                   supabase.auth.signOut().then((value) {
                     Navigator.pushReplacement(
                       context,

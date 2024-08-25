@@ -129,24 +129,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.logout_outlined,
-                          color: CustomColors.red,
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          'Logout',
-                          style: TextStyle(
-                            color: CustomColors.red,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               );
             },

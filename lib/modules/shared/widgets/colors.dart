@@ -7,7 +7,7 @@ abstract final class CustomColors {
   static const black50 = Color(0XFF808080);
   static const black75 = Color(0XFF404040);
   static const white = Color(0XFFFFFFFF);
-  static const red10 = Color(0XFFFDE7E8);
+  static const red20 = Color(0XFFF9CED0);
   static const red = Color(0XFFE20914);
   static const green10 = Color(0XFFE6FAF9);
   static const green = Color(0XFF00C4BB);

@@ -25,6 +25,28 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
   final supabase = Supabase.instance.client;
   bool _loading = true;
 
+  createTodayRecord() {
+    supabase
+        .from('user_records')
+        .insert({
+          // "uid": supabase.auth.currentUser!.id,
+          "date": DateFormat('yyyy-MM-dd').format(DateTime.now()),
+          "day": DateFormat('EEEE').format(DateTime.now()),
+          "dialed": 0,
+          "connected": 0,
+          "meetings": 0,
+          "callbacks": 0,
+        })
+        .then((value) => debugPrint("----------------new record created"))
+        .catchError((error) =>
+            debugPrint("----------------error creating record: $error"));
+    ref.watch(yourRecordsProvider.notifier).setTodayRecord(
+          RecordModel(
+            date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+          ),
+        );
+  }
+
   //functions
   getUserRecord() {
     supabase
@@ -35,35 +57,21 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
         .order('date')
         .limit(10)
         .then((results) {
-      ref
-          .watch(yourRecordsProvider.notifier)
-          .setRecords(results.map((e) => RecordModel.fromJson(e)).toList());
-
-      if (results[0]['date'] ==
-          DateFormat('yyyy-MM-dd').format(DateTime.now())) {
+      if (results.isEmpty) {
+        createTodayRecord();
+      } else {
         ref
             .watch(yourRecordsProvider.notifier)
-            .setTodayRecord(RecordModel.fromJson(results[0]));
-      } else {
-        supabase
-            .from('user_records')
-            .insert({
-              // "uid": supabase.auth.currentUser!.id,
-              "date": DateFormat('yyyy-MM-dd').format(DateTime.now()),
-              "day": DateFormat('EEEE').format(DateTime.now()),
-              "dialed": 0,
-              "connected": 0,
-              "meetings": 0,
-              "callbacks": 0,
-            })
-            .then((value) => debugPrint("----------------new record created"))
-            .catchError((error) =>
-                debugPrint("----------------error creating record: $error"));
-        ref.watch(yourRecordsProvider.notifier).setTodayRecord(
-              RecordModel(
-                date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-              ),
-            );
+            .setRecords(results.map((e) => RecordModel.fromJson(e)).toList());
+
+        if (results[0]['date'] ==
+            DateFormat('yyyy-MM-dd').format(DateTime.now())) {
+          ref
+              .watch(yourRecordsProvider.notifier)
+              .setTodayRecord(RecordModel.fromJson(results[0]));
+        } else {
+          createTodayRecord();
+        }
       }
 
       setState(() {
@@ -71,6 +79,7 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
       });
     }).onError((error, stackTrace) {
       errorSnackBar(context, "Error fetching records");
+      debugPrint("----------------error fetching records: $error");
       setState(() {
         _loading = false;
       });
@@ -113,9 +122,17 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
                     .select()
                     .then((record) {
                       debugPrint("----------------record: $record");
-                      ref
-                          .watch(yourRecordsProvider.notifier)
-                          .setTodayRecord(RecordModel.fromJson(record[0]));
+                      if (record.isNotEmpty) {
+                        ref
+                            .watch(yourRecordsProvider.notifier)
+                            .setTodayRecord(RecordModel.fromJson(record[0]));
+                      } else {
+                        debugPrint("No record found for today");
+                      }
+                    })
+                    .catchError((error, stackTrace) {
+                      debugPrint("Error updating record: $error");
+                      errorSnackBar(context, "Error updating record");
                     });
               }
             });
@@ -200,30 +217,33 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
           ),
         ),
         if (ref.watch(yourRecordsProvider).records.isEmpty && !_loading)
-          Center(
+          Container(
+              height: 300,
+              width: double.infinity,
+              alignment: Alignment.center,
               child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("No calling history"),
-              const SizedBox(height: 12),
-              TextButton.icon(
-                style: TextButton.styleFrom(
-                  backgroundColor: CustomColors.black,
-                ),
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.add_circle_outline_rounded,
-                  color: CustomColors.white,
-                ),
-                label: const Text(
-                  "Start tracking calls now!",
-                  style: TextStyle(
-                    color: CustomColors.white,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text("No calling history"),
+                  const SizedBox(height: 12),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      backgroundColor: CustomColors.black,
+                    ),
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.add_circle_outline_rounded,
+                      color: CustomColors.white,
+                    ),
+                    label: const Text(
+                      "Start tracking calls now!",
+                      style: TextStyle(
+                        color: CustomColors.white,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          )),
+                ],
+              )),
         if (_loading)
           ListView.builder(
             shrinkWrap: true,

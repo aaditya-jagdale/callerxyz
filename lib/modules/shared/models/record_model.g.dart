@@ -8,6 +8,7 @@ part of 'record_model.dart';
 
 _$RecordModelImpl _$$RecordModelImplFromJson(Map<String, dynamic> json) =>
     _$RecordModelImpl(
+      id: (json['id'] as num?)?.toInt() ?? 0,
       date: json['date'] as String? ?? "",
       day: json['day'] as String? ?? "",
       dialed: (json['dialed'] as num?)?.toInt() ?? 0,
@@ -22,6 +23,7 @@ _$RecordModelImpl _$$RecordModelImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$RecordModelImplToJson(_$RecordModelImpl instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'date': instance.date,
       'day': instance.day,
       'dialed': instance.dialed,

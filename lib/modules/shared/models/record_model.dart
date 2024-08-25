@@ -6,6 +6,7 @@ part 'record_model.g.dart';
 @freezed
 abstract class RecordModel with _$RecordModel {
   const factory RecordModel({
+    @Default(0) int id,
     @Default("") String date,
     @Default("") String day,
     @Default(0) int dialed,

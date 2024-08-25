@@ -20,6 +20,7 @@ RecordModel _$RecordModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$RecordModel {
+  int get id => throw _privateConstructorUsedError;
   String get date => throw _privateConstructorUsedError;
   String get day => throw _privateConstructorUsedError;
   int get dialed => throw _privateConstructorUsedError;
@@ -44,7 +45,8 @@ abstract class $RecordModelCopyWith<$Res> {
       _$RecordModelCopyWithImpl<$Res, RecordModel>;
   @useResult
   $Res call(
-      {String date,
+      {int id,
+      String date,
       String day,
       int dialed,
       int connected,
@@ -69,6 +71,7 @@ class _$RecordModelCopyWithImpl<$Res, $Val extends RecordModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? date = null,
     Object? day = null,
     Object? dialed = null,
@@ -81,6 +84,10 @@ class _$RecordModelCopyWithImpl<$Res, $Val extends RecordModel>
     Object? connect_to_meet = null,
   }) {
     return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
       date: null == date
           ? _value.date
           : date // ignore: cast_nullable_to_non_nullable
@@ -134,7 +141,8 @@ abstract class _$$RecordModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String date,
+      {int id,
+      String date,
       String day,
       int dialed,
       int connected,
@@ -157,6 +165,7 @@ class __$$RecordModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? date = null,
     Object? day = null,
     Object? dialed = null,
@@ -169,6 +178,10 @@ class __$$RecordModelImplCopyWithImpl<$Res>
     Object? connect_to_meet = null,
   }) {
     return _then(_$RecordModelImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
       date: null == date
           ? _value.date
           : date // ignore: cast_nullable_to_non_nullable
@@ -217,7 +230,8 @@ class __$$RecordModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$RecordModelImpl implements _RecordModel {
   const _$RecordModelImpl(
-      {this.date = "",
+      {this.id = 0,
+      this.date = "",
       this.day = "",
       this.dialed = 0,
       this.connected = 0,
@@ -231,6 +245,9 @@ class _$RecordModelImpl implements _RecordModel {
   factory _$RecordModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$RecordModelImplFromJson(json);
 
+  @override
+  @JsonKey()
+  final int id;
   @override
   @JsonKey()
   final String date;
@@ -264,7 +281,7 @@ class _$RecordModelImpl implements _RecordModel {
 
   @override
   String toString() {
-    return 'RecordModel(date: $date, day: $day, dialed: $dialed, connected: $connected, callbacks: $callbacks, meetings: $meetings, conversions: $conversions, dial_to_connect: $dial_to_connect, dial_to_meet: $dial_to_meet, connect_to_meet: $connect_to_meet)';
+    return 'RecordModel(id: $id, date: $date, day: $day, dialed: $dialed, connected: $connected, callbacks: $callbacks, meetings: $meetings, conversions: $conversions, dial_to_connect: $dial_to_connect, dial_to_meet: $dial_to_meet, connect_to_meet: $connect_to_meet)';
   }
 
   @override
@@ -272,6 +289,7 @@ class _$RecordModelImpl implements _RecordModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$RecordModelImpl &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.date, date) || other.date == date) &&
             (identical(other.day, day) || other.day == day) &&
             (identical(other.dialed, dialed) || other.dialed == dialed) &&
@@ -295,6 +313,7 @@ class _$RecordModelImpl implements _RecordModel {
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      id,
       date,
       day,
       dialed,
@@ -322,7 +341,8 @@ class _$RecordModelImpl implements _RecordModel {
 
 abstract class _RecordModel implements RecordModel {
   const factory _RecordModel(
-      {final String date,
+      {final int id,
+      final String date,
       final String day,
       final int dialed,
       final int connected,
@@ -336,6 +356,8 @@ abstract class _RecordModel implements RecordModel {
   factory _RecordModel.fromJson(Map<String, dynamic> json) =
       _$RecordModelImpl.fromJson;
 
+  @override
+  int get id;
   @override
   String get date;
   @override

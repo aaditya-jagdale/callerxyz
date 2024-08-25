@@ -2,21 +2,22 @@ import 'package:callerxyz/modules/home/widgets/record_card.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
+import 'package:callerxyz/riverpod/your_records.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class YourRecordSection extends StatefulWidget {
+class YourRecordSection extends ConsumerStatefulWidget {
   const YourRecordSection({super.key});
 
   @override
-  State<YourRecordSection> createState() => _YourRecordSectionState();
+  ConsumerState<YourRecordSection> createState() => _YourRecordSectionState();
 }
 
-class _YourRecordSectionState extends State<YourRecordSection> {
+class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
   final supabase = Supabase.instance.client;
   bool _loading = true;
-  List<RecordModel> records = [];
   getUserRecord() {
     //get user record from the database
     supabase
@@ -27,9 +28,9 @@ class _YourRecordSectionState extends State<YourRecordSection> {
         .order('date')
         .then((results) {
       debugPrint("${results.length} records fetched");
-      setState(() {
-        records = results.map((e) => RecordModel.fromJson(e)).toList();
-      });
+      ref
+          .watch(yourRecordsProvider.notifier)
+          .setRecords(results.map((e) => RecordModel.fromJson(e)).toList());
       setState(() {
         _loading = false;
       });
@@ -73,7 +74,7 @@ class _YourRecordSectionState extends State<YourRecordSection> {
           ],
         ),
         const SizedBox(height: 10),
-        if (records.isEmpty && !_loading)
+        if (ref.watch(yourRecordsProvider).records.isEmpty && !_loading)
           Expanded(
             child: Center(
                 child: Column(
@@ -100,7 +101,7 @@ class _YourRecordSectionState extends State<YourRecordSection> {
               ],
             )),
           ),
-        if (  _loading)
+        if (_loading)
           Expanded(
             child: ListView.builder(
               itemCount: 5, // Arbitrary number of shimmer tiles
@@ -122,12 +123,12 @@ class _YourRecordSectionState extends State<YourRecordSection> {
               },
             ),
           ),
-        if (!_loading && records.isNotEmpty)
+        if (!_loading && ref.watch(yourRecordsProvider).records.isNotEmpty)
           Expanded(
             child: ListView.builder(
-              itemCount: records.length,
+              itemCount: ref.watch(yourRecordsProvider).records.length,
               itemBuilder: (context, index) {
-                final record = records[index];
+                final record = ref.watch(yourRecordsProvider).records[index];
                 return RecordCard(record: record);
               },
             ),

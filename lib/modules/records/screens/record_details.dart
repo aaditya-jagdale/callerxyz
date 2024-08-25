@@ -2,8 +2,10 @@ import 'package:callerxyz/modules/records/widget/record_info_list.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/custom_buttons.dart';
+import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:callerxyz/modules/shared/widgets/textfields.dart';
 import 'package:callerxyz/riverpod/record_data.dart';
+import 'package:callerxyz/riverpod/your_records.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -246,16 +248,17 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                           ref
                               .read(recordDataController.notifier)
                               .updateTotalDialed(int.parse(_controller.text));
+
                           Navigator.pop(context);
                         },
                       );
                     },
-                    onIncremenet: () => ref
-                        .read(recordDataController.notifier)
-                        .dialedIncrement(),
-                    onDecrement: () => ref
-                        .read(recordDataController.notifier)
-                        .dialedDecrement(),
+                    onIncremenet: () {
+                      ref.read(recordDataController.notifier).dialedIncrement();
+                    },
+                    onDecrement: () {
+                      ref.read(recordDataController.notifier).dialedDecrement();
+                    },
                   ),
 
                   //Connected
@@ -279,16 +282,21 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                           ref
                               .read(recordDataController.notifier)
                               .updateConnected(int.parse(_controller.text));
+
                           Navigator.pop(context);
                         },
                       );
                     },
-                    onIncremenet: () => ref
-                        .read(recordDataController.notifier)
-                        .connectedIncrement(),
-                    onDecrement: () => ref
-                        .read(recordDataController.notifier)
-                        .connectedDecrement(),
+                    onIncremenet: () {
+                      ref
+                          .read(recordDataController.notifier)
+                          .connectedIncrement();
+                    },
+                    onDecrement: () {
+                      ref
+                          .read(recordDataController.notifier)
+                          .connectedDecrement();
+                    },
                   ),
 
                   const Padding(
@@ -367,12 +375,16 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                         },
                       );
                     },
-                    onIncremenet: () => ref
-                        .read(recordDataController.notifier)
-                        .meetingsIncrement(),
-                    onDecrement: () => ref
-                        .read(recordDataController.notifier)
-                        .meetingsDecrement(),
+                    onIncremenet: () {
+                      ref
+                          .read(recordDataController.notifier)
+                          .meetingsIncrement();
+                    },
+                    onDecrement: () {
+                      ref
+                          .read(recordDataController.notifier)
+                          .meetingsDecrement();
+                    },
                   ),
 
                   //Conversions
@@ -396,16 +408,21 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                           ref
                               .read(recordDataController.notifier)
                               .updateConversions(int.parse(_controller.text));
+
                           Navigator.pop(context);
                         },
                       );
                     },
-                    onIncremenet: () => ref
-                        .read(recordDataController.notifier)
-                        .conversionsIncrement(),
-                    onDecrement: () => ref
-                        .read(recordDataController.notifier)
-                        .conversionsDecrement(),
+                    onIncremenet: () {
+                      ref
+                          .read(recordDataController.notifier)
+                          .conversionsIncrement();
+                    },
+                    onDecrement: () {
+                      ref
+                          .read(recordDataController.notifier)
+                          .conversionsDecrement();
+                    },
                   ),
 
                   const Padding(
@@ -509,16 +526,21 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                               .read(recordDataController.notifier)
                               .updateCallbackReq(int.parse(_controller.text));
                           _controller.clear();
+
                           Navigator.pop(context);
                         },
                       );
                     },
-                    onIncremenet: () => ref
-                        .read(recordDataController.notifier)
-                        .callbackReqIncrement(),
-                    onDecrement: () => ref
-                        .read(recordDataController.notifier)
-                        .callbackReqDecrement(),
+                    onIncremenet: () {
+                      ref
+                          .read(recordDataController.notifier)
+                          .callbackReqIncrement();
+                    },
+                    onDecrement: () {
+                      ref
+                          .read(recordDataController.notifier)
+                          .callbackReqDecrement();
+                    },
                   ),
 
                   const SizedBox(height: 20),
@@ -561,8 +583,9 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                                 builder: (context, value, _) =>
                                     CircularProgressIndicator(
                                   value: value,
+                                  strokeCap: StrokeCap.round,
                                   strokeWidth: 12,
-                                  backgroundColor: CustomColors.black50,
+                                  backgroundColor: CustomColors.black25,
                                   valueColor:
                                       const AlwaysStoppedAnimation<Color>(
                                           CustomColors.green),

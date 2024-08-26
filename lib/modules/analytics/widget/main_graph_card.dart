@@ -142,7 +142,9 @@ class MainGraphCard extends StatelessWidget {
                       return touchedBarSpots.map((barSpot) {
                         final flSpot = barSpot;
                         return LineTooltipItem(
-                          '${flSpot.y.toStringAsFixed(0)} calls',
+                          title == "Dialed Record"
+                              ? '${flSpot.y.toStringAsFixed(0)} calls'
+                              : '${flSpot.y.toStringAsFixed(0)} %',
                           const TextStyle(
                             color: CustomColors.white,
                             fontWeight: FontWeight.bold,

@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:callerxyz/modules/home/screens/all_records.dart';
 import 'package:callerxyz/modules/home/widgets/record_card.dart';
 import 'package:callerxyz/modules/home/widgets/today_tile.dart';
 import 'package:callerxyz/modules/records/screens/record_details.dart';
@@ -51,7 +54,6 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
         .eq("uid", supabase.auth.currentUser!.id)
         .select()
         .order('date')
-        .limit(10)
         .then((results) {
       if (results.isEmpty) {
         createTodayRecord();
@@ -172,7 +174,6 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
                     width: 20,
                   ),
                   value: ref.watch(yourRecordsProvider).todayRecord.dialed,
-                  onTap: () {},
                 ),
                 TodayTile(
                   title: 'Connected',
@@ -182,7 +183,6 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
                     width: 20,
                   ),
                   value: ref.watch(yourRecordsProvider).todayRecord.connected,
-                  onTap: () {},
                 ),
               ],
             ),
@@ -191,30 +191,35 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
         const SizedBox(height: 10),
 
         // Your Record
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (_loading)
-                Container(
-                  height: 20,
-                  width: 20,
-                  margin: const EdgeInsets.only(left: 10, right: 10),
-                  child: const CircularProgressIndicator(
-                      strokeCap: StrokeCap.round),
+        GestureDetector(
+          onTap: () {
+            rightSlideTransition(context, const AllRecords());
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (_loading)
+                  Container(
+                    height: 20,
+                    width: 20,
+                    margin: const EdgeInsets.only(left: 10, right: 10),
+                    child: const CircularProgressIndicator(
+                        strokeCap: StrokeCap.round),
+                  ),
+                const Text(
+                  "Your Record",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-              const Text(
-                "Your Record",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const Spacer(),
-              const Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 18,
-              )
-            ],
+                const Spacer(),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 18,
+                )
+              ],
+            ),
           ),
         ),
         if (ref.watch(yourRecordsProvider).records.isEmpty && !_loading)
@@ -271,7 +276,7 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: ref.watch(yourRecordsProvider).records.length,
+            itemCount: min(ref.watch(yourRecordsProvider).records.length, 10),
             itemBuilder: (context, index) {
               final record = ref.watch(yourRecordsProvider).records[index];
               return RecordCard(record: record);

@@ -2,14 +2,15 @@ import 'package:callerxyz/modules/analytics/widget/main_graph_card.dart';
 import 'package:callerxyz/modules/analytics/widget/track_record_tile.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
-import 'package:callerxyz/riverpod/analytics_riverpod.dart';
+import 'package:callerxyz/riverpod/records_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class Analytics extends ConsumerStatefulWidget {
-  const Analytics({super.key});
+  final List<RecordModel> records;
+  const Analytics({super.key, required this.records});
 
   @override
   ConsumerState<Analytics> createState() => _AnalyticsState();
@@ -17,42 +18,88 @@ class Analytics extends ConsumerStatefulWidget {
 
 class _AnalyticsState extends ConsumerState<Analytics> {
   final supabase = Supabase.instance.client;
+  List<FlSpot> dialed = [];
+  List<FlSpot> connected = [];
+  List<FlSpot> meetings = [];
+  List<FlSpot> conversions = [];
+  List<FlSpot> dialToConnected = [];
 
   getUserData() async {
-    List results = await supabase
-        .from('user_records')
-        .select()
-        .eq('uid', supabase.auth.currentUser!.id)
-        .select();
-    List<RecordModel> records =
-        results.map((record) => RecordModel.fromJson(record)).toList();
+    List<RecordModel> results = widget.records;
 
-    //Check the value of dialed where date is higher than 2024-06-20
-    final dailyDialed = records
-        .where((record) =>
-            DateTime.parse(record.date).isAfter(DateTime.parse('2024-06-20')))
-        .map((record) => FlSpot(DateTime.parse(record.date).day.toDouble(),
-            record.dialed.toDouble()))
+    List<RecordModel> records = results;
+    // debugPrint("-------------------------all records: $records");
+
+    final totalDialed = records
+        .where((record) => DateTime.parse(record.date)
+            .isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .map((record) => record.dialed != 0
+            ? FlSpot(DateTime.parse(record.date).day.toDouble(),
+                record.dialed.toDouble())
+            : null)
+        .where((spot) => spot != null)
+        .cast<FlSpot>()
         .toList();
 
-    final dialToConnect = records
-        .where((record) =>
-            DateTime.parse(record.date).isAfter(DateTime.parse('2024-06-20')))
-        .map((record) {
-      double percentage =
-          record.dialed > 0 ? (record.connected / record.dialed) * 100 : 0;
-      return FlSpot(DateTime.parse(record.date).day.toDouble(), percentage);
-    }).toList();
+    final totalConnected = records
+        .where((record) => DateTime.parse(record.date)
+            .isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .map((record) => record.connected != 0
+            ? FlSpot(DateTime.parse(record.date).day.toDouble(),
+                record.connected.toDouble())
+            : null)
+        .where((spot) => spot != null)
+        .cast<FlSpot>()
+        .toList();
 
-    // ref.watch(analyticsProvider.notifier).updateDailed(dailyDialed);
-    // ref.watch(analyticsProvider.notifier).updateDailedToConnect(dialToConnect);
-    debugPrint("-------------------------dialed: $dailyDialed");
+    final totalMeetings = records
+        .where((record) => DateTime.parse(record.date)
+            .isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .map((record) => record.meetings != 0
+            ? FlSpot(DateTime.parse(record.date).day.toDouble(),
+                record.meetings.toDouble())
+            : null)
+        .where((spot) => spot != null)
+        .cast<FlSpot>()
+        .toList();
+
+    final totalConversions = records
+        .where((record) => DateTime.parse(record.date)
+            .isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .map((record) => record.conversions != 0
+            ? FlSpot(DateTime.parse(record.date).day.toDouble(),
+                record.conversions.toDouble())
+            : null)
+        .where((spot) => spot != null)
+        .cast<FlSpot>()
+        .toList();
+
+    final totalDialToConnected = records
+        .where((record) => DateTime.parse(record.date)
+            .isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .map((record) => record.dialed != 0 && record.connected != 0
+            ? FlSpot(DateTime.parse(record.date).day.toDouble(),
+                (record.connected / record.dialed * 100).toDouble())
+            : null)
+        .where((spot) => spot != null)
+        .cast<FlSpot>()
+        .toList();
+
+    setState(() {
+      dialed = totalDialed;
+      connected = totalConnected;
+      meetings = totalMeetings;
+      conversions = totalConversions;
+      dialToConnected = totalDialToConnected;
+    });
   }
 
   @override
   void initState() {
     getUserData();
-    WidgetsBinding.instance.addPostFrameCallback((_) {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getUserData();
+    });
     super.initState();
   }
 
@@ -177,36 +224,43 @@ class _AnalyticsState extends ConsumerState<Analytics> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                // MainGraphCard(
-                //   pointsList: ref.watch(analyticsProvider).dailed,
-                //   timeFrame: ref.watch(analyticsProvider).timePeriods,
-                //   title: "Dialed Record",
-                // ),
-                // MainGraphCard(
-                //   pointsList: ref.watch(analyticsProvider).dailedToConnect,
-                //   timeFrame: ref.watch(analyticsProvider).timePeriods,
-                //   title: "Dial-to-Connect %",
-                // ),
+                MainGraphCard(
+                  pointsList: dialed,
+                  timeFrame: List.generate(
+                      7,
+                      (index) =>
+                          DateTime.now().subtract(Duration(days: index))),
+                  title: "Dialed Record",
+                ),
+                MainGraphCard(
+                  pointsList: dialToConnected,
+                  timeFrame: List.generate(
+                      7,
+                      (index) =>
+                          DateTime.now().subtract(Duration(days: index))),
+                  title: "Dial-to-Connect %",
+                ),
               ],
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Track Record",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                TrackRecordTile(title: "Dialed", value: 1000000),
-                TrackRecordTile(title: "Connected", value: 1065650),
-                TrackRecordTile(title: "Meetings", value: 100),
-                TrackRecordTile(title: "Conversions", value: 5100),
+                TrackRecordTile(title: "Dialed", value: dialed.length),
+                TrackRecordTile(title: "Connected", value: connected.length),
+                TrackRecordTile(title: "Meetings", value: meetings.length),
+                TrackRecordTile(
+                    title: "Conversions", value: conversions.length),
               ],
             ),
           )

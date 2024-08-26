@@ -6,6 +6,7 @@ import 'package:callerxyz/modules/shared/widgets/transitions.dart';
 import 'package:callerxyz/riverpod/fcm_init.dart';
 import 'package:callerxyz/modules/shared/screens/user_info.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
+import 'package:callerxyz/riverpod/records_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -105,7 +106,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 items: [
                   PopupMenuItem(
                     onTap: () {
-                      fadeTransition(context, const Analytics());
+                      fadeTransition(
+                        context,
+                        Analytics(
+                          records: ref.watch(yourRecordsProvider).records,
+                        ),
+                      );
                     },
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,

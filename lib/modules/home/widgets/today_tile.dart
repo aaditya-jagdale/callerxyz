@@ -5,13 +5,11 @@ class TodayTile extends StatelessWidget {
   final String title;
   final Widget icon;
   final int value;
-  final VoidCallback? onTap;
   const TodayTile({
     super.key,
     required this.title,
     required this.icon,
     required this.value,
-    this.onTap,
   });
 
   @override

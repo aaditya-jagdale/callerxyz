@@ -1,69 +1,61 @@
-import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:fl_chart/fl_chart.dart';
 
-class AnalyticsData {
-  final List<FlSpot> dialed;
-  final List<FlSpot> connected;
-  final List<FlSpot> meetings;
-  final List<FlSpot> conversions;
-  final List<DateTime> timeFrame;
+// class AnalyticsState {
+//   final List<FlSpot> dialed;
+//   final List<FlSpot> connected;
+//   final List<FlSpot> meetings;
+//   final List<FlSpot> conversions;
 
-  const AnalyticsData({
-    List<FlSpot>? dialed,
-    List<FlSpot>? connected,
-    List<FlSpot>? meetings,
-    List<FlSpot>? conversions,
-    List<DateTime>? timeFrame,
-  })  : dialed = dialed ?? const [],
-        connected = connected ?? const [],
-        meetings = meetings ?? const [],
-        conversions = conversions ?? const [],
-        timeFrame = timeFrame ?? const [];
+//   AnalyticsState({
+//     required this.dialed,
+//     required this.connected,
+//     required this.meetings,
+//     required this.conversions,
+//   });
 
-  AnalyticsData copyWith({
-    List<FlSpot>? dialed = const [],
-    List<FlSpot>? connected = const [],
-    List<FlSpot>? meetings = const [],
-    List<FlSpot>? conversions = const [],
-    List<DateTime>? timeFrame = const [],
-  }) {
-    return AnalyticsData(
-      dialed: dialed ?? this.dialed,
-      connected: connected ?? this.connected,
-      meetings: meetings ?? this.meetings,
-      conversions: conversions ?? this.conversions,
-      timeFrame: timeFrame ?? this.timeFrame,
-    );
-  }
-}
+//   AnalyticsState copyWith({
+//     List<FlSpot>? dialed,
+//     List<FlSpot>? connected,
+//     List<FlSpot>? meetings,
+//     List<FlSpot>? conversions,
+//   }) {
+//     return AnalyticsState(
+//       dialed: dialed ?? this.dialed,
+//       connected: connected ?? this.connected,
+//       meetings: meetings ?? this.meetings,
+//       conversions: conversions ?? this.conversions,
+//     );
+//   }
+// }
 
-class AnalyticsNotifier extends StateNotifier<AnalyticsData> {
-  AnalyticsNotifier() : super(const AnalyticsData());
+// class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
+//   AnalyticsNotifier()
+//       : super(AnalyticsState(
+//           dialed: [],
+//           connected: [],
+//           meetings: [],
+//           conversions: [],
+//         ));
 
-  void updateTimeframe(int index) {
-    List<DateTime> timeFrame = [];
-    if (index == 0) {
-      timeFrame = [DateTime.now().subtract(const Duration(days: 7))];
-    }
-    if (index == 1) {
-      timeFrame = [DateTime.now().subtract(const Duration(days: 30))];
-    }
-    if (index == 2) {
-      timeFrame = [DateTime.now().subtract(const Duration(days: 90))];
-    }
-    state = state.copyWith(timeFrame: timeFrame);
-  }
+//   void updateDialed(List<FlSpot> dialed) {
+//     state = state.copyWith(dialed: dialed);
+//   }
 
-  void updateDailed(List<int> dialed) {
-    //convert to FlSpot
-    List<FlSpot> dialedSpots =
-        dialed.map((e) => FlSpot(e.toDouble(), e.toDouble())).toList();
+//   void updateConnected(List<FlSpot> connected) {
+//     state = state.copyWith(connected: connected);
+//   }
 
-    state = state.copyWith(dialed: dialedSpots);
-  }
-}
+//   void updateMeetings(List<FlSpot> meetings) {
+//     state = state.copyWith(meetings: meetings);
+//   }
 
-final analyticsProvider =
-    StateNotifierProvider<AnalyticsNotifier, AnalyticsData>((ref) {
-  return AnalyticsNotifier();
-});
+//   void updateConversions(List<FlSpot> conversions) {
+//     state = state.copyWith(conversions: conversions);
+//   }
+// }
+
+// final analyticsProvider =
+//     StateNotifierProvider<AnalyticsNotifier, AnalyticsState>((ref) {
+//   return AnalyticsNotifier();
+// });

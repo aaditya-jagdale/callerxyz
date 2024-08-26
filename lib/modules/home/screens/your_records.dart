@@ -60,15 +60,6 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
         ref
             .watch(yourRecordsProvider.notifier)
             .setRecords(results.map((e) => RecordModel.fromJson(e)).toList());
-
-        if (results[0]['date'] ==
-            DateFormat('yyyy-MM-dd').format(DateTime.now())) {
-          ref
-              .watch(yourRecordsProvider.notifier)
-              .setTodayRecord(RecordModel.fromJson(results[0]));
-        } else {
-          createTodayRecord();
-        }
       }
 
       setState(() {
@@ -122,20 +113,7 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
                       if (record.isNotEmpty) {
                         ref
                             .watch(yourRecordsProvider.notifier)
-                            .setTodayRecord(RecordModel.fromJson(record[0]));
-
-                        if (ref.watch(yourRecordsProvider).todayRecord.dialed ==
-                            0) {
-                          ref.read(calendarDataProvider.notifier).removeDate(
-                              DateTime.now()
-                                  .difference(DateTime.parse(
-                                      ref.read(recordDataController).date))
-                                  .inDays);
-                        } else {
-                          ref.read(calendarDataProvider.notifier).addDate(0);
-                        }
-                      } else {
-                        debugPrint("No record found for today");
+                            .updateRecord(RecordModel.fromJson(record[0]));
                       }
                     })
                     .catchError((error, stackTrace) {

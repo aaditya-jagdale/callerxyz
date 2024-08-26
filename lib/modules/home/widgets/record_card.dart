@@ -36,9 +36,9 @@ class _RecordCardState extends ConsumerState<RecordCard> {
         .eq('id', widget.record.id)
         .select()
         .then((value) {
-          ref
-              .read(yourRecordsProvider.notifier)
-              .updateRecord(RecordModel.fromJson(value[0]));
+          ref.read(yourRecordsProvider.notifier).updateRecord(
+              RecordModel.fromJson(
+                  value.firstWhere((e) => e['id'] == widget.record.id)));
 
           if (ref
                   .read(yourRecordsProvider.notifier)
@@ -69,7 +69,7 @@ class _RecordCardState extends ConsumerState<RecordCard> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
         decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(

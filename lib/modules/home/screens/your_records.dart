@@ -26,25 +26,20 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
   bool _loading = true;
 
   createTodayRecord() {
-    supabase
-        .from('user_records')
-        .insert({
-          // "uid": supabase.auth.currentUser!.id,
-          "date": DateFormat('yyyy-MM-dd').format(DateTime.now()),
-          "day": DateFormat('EEEE').format(DateTime.now()),
-          "dialed": 0,
-          "connected": 0,
-          "meetings": 0,
-          "callbacks": 0,
-        })
-        .then((value) => debugPrint("----------------new record created"))
-        .catchError((error) =>
-            debugPrint("----------------error creating record: $error"));
-    ref.watch(yourRecordsProvider.notifier).setTodayRecord(
-          RecordModel(
-            date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-          ),
-        );
+    supabase.from('user_records').insert({
+      // "uid": supabase.auth.currentUser!.id,
+      "date": DateTime.now().toIso8601String(),
+      "day": DateFormat('EEEE').format(DateTime.now()),
+      "dialed": 0,
+      "connected": 0,
+      "meetings": 0,
+      "callbacks": 0,
+    }).then((value) {
+      debugPrint("----------------new record created");
+      getUserRecord();
+    }).catchError((error) {
+      debugPrint("----------------error creating record: $error");
+    });
   }
 
   //functions

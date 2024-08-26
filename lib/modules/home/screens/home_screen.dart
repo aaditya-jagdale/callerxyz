@@ -1,6 +1,8 @@
+import 'package:callerxyz/modules/analytics/pages/analytics.dart';
 import 'package:callerxyz/modules/home/screens/calendar_view.dart';
 import 'package:callerxyz/modules/home/screens/profile_page.dart';
 import 'package:callerxyz/modules/home/screens/your_records.dart';
+import 'package:callerxyz/modules/shared/widgets/transitions.dart';
 import 'package:callerxyz/riverpod/fcm_init.dart';
 import 'package:callerxyz/modules/shared/screens/user_info.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
@@ -101,8 +103,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 context: context,
                 position: const RelativeRect.fromLTRB(100, 90, 15, 0),
                 items: [
-                  const PopupMenuItem(
-                    child: Row(
+                  PopupMenuItem(
+                    onTap: () {
+                      fadeTransition(context, const Analytics());
+                    },
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.analytics_outlined),

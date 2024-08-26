@@ -46,23 +46,32 @@ class _OnboardingPageState extends State<OnboardingPage> {
       accessToken: accessToken,
     )
         .then((value) async {
-      setState(() {
-        _loading = false;
-      });
-
-      await supabase.from('users').insert({
-        'uid': supabase.auth.currentUser!.id,
-        'email': googleUser.email,
-        'name': googleUser.displayName,
-        'photo_url': googleUser.photoUrl,
-        'created_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      }).then(
-        (value) => Navigator.pushReplacement(
+      //check if user exists
+      supabase
+          .from('users')
+          .select()
+          .eq('email', value.user!.email!)
+          .single()
+          .then((value) async {
+        if (value.isEmpty) {
+          await supabase.from('users').insert({
+            'uid': supabase.auth.currentUser!.id,
+            'email': googleUser.email,
+            'name': googleUser.displayName,
+            'photo_url': googleUser.photoUrl,
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+        }
+      }).then((value) {
+        setState(() {
+          _loading = false;
+        });
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
-        ),
-      );
+        );
+      });
     });
   }
 

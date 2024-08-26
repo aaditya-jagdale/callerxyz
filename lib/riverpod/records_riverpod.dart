@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:intl/intl.dart';
@@ -16,10 +15,9 @@ class RecordState {
 
 class YourRecordsNotifier extends StateNotifier<RecordState> {
   YourRecordsNotifier()
-      : super(RecordState(records: [], todayRecord: RecordModel()));
+      : super(RecordState(records: [], todayRecord: const RecordModel()));
 
   void setTodayRecord(RecordModel record) {
-    debugPrint("------------setting today record: $record");
     state = RecordState(records: state.records, todayRecord: record);
   }
 
@@ -27,7 +25,7 @@ class YourRecordsNotifier extends StateNotifier<RecordState> {
     final todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
     final todayRecord = records.firstWhere(
       (e) => e.date == todayDate,
-      orElse: () => RecordModel(),
+      orElse: () => const RecordModel(),
     );
 
     state = RecordState(
@@ -46,8 +44,6 @@ class YourRecordsNotifier extends StateNotifier<RecordState> {
   }
 
   void updateRecord(RecordModel updatedRecord) {
-    debugPrint("------------update record: $updatedRecord");
-
     final todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
     if (updatedRecord.date == todayDate) {
       state = RecordState(records: state.records, todayRecord: updatedRecord);

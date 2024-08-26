@@ -29,7 +29,6 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
 
   createTodayRecord() {
     supabase.from('user_records').insert({
-      // "uid": supabase.auth.currentUser!.id,
       "date": DateTime.now().toIso8601String(),
       "day": DateFormat('EEEE').format(DateTime.now()),
       "dialed": 0,
@@ -106,14 +105,20 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
                       'callbacks': ref.watch(recordDataController).callbackReq,
                     })
                     .eq('uid', supabase.auth.currentUser!.id)
-                    .eq('date', DateFormat('yyyy-MM-dd').format(DateTime.now()))
+                    .eq('id', ref.watch(yourRecordsProvider).todayRecord.id)
                     .select()
                     .then((record) {
-                      debugPrint("----------------record: $record");
                       if (record.isNotEmpty) {
                         ref
                             .watch(yourRecordsProvider.notifier)
                             .updateRecord(RecordModel.fromJson(record[0]));
+                        if (record[0]['dialed'] == 0) {
+                          ref
+                              .watch(calendarDataProvider.notifier)
+                              .removeDate(0);
+                        } else {
+                          ref.watch(calendarDataProvider.notifier).addDate(0);
+                        }
                       }
                     })
                     .catchError((error, stackTrace) {

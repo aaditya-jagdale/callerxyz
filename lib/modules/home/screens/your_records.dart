@@ -117,9 +117,9 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
                         if (record[0]['dialed'] == 0) {
                           ref
                               .watch(calendarDataProvider.notifier)
-                              .removeDate(0);
+                              .removeDate('isConverted', 0);
                         } else {
-                          ref.watch(calendarDataProvider.notifier).addDate(0);
+                          ref.watch(calendarDataProvider.notifier).addDate('isConverted', 0);
                         }
                       }
                     })

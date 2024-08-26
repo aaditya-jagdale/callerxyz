@@ -104,24 +104,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 context: context,
                 position: const RelativeRect.fromLTRB(100, 90, 15, 0),
                 items: [
-                  PopupMenuItem(
-                    onTap: () {
-                      fadeTransition(
-                        context,
-                        Analytics(
-                          records: ref.watch(yourRecordsProvider).records,
-                        ),
-                      );
-                    },
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.analytics_outlined),
-                        SizedBox(width: 10),
-                        Text('Analytics'),
-                      ],
+                  if (ref.watch(yourRecordsProvider).records.isNotEmpty)
+                    PopupMenuItem(
+                      onTap: () {
+                        fadeTransition(
+                          context,
+                          Analytics(
+                            records: ref.watch(yourRecordsProvider).records
+                              ..sort((a, b) => DateTime.parse(b.date)
+                                  .compareTo(DateTime.parse(a.date))),
+                          ),
+                        );
+                      },
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.analytics_outlined),
+                          SizedBox(width: 10),
+                          Text('Analytics'),
+                        ],
+                      ),
                     ),
-                  ),
                   PopupMenuItem(
                     onTap: () {
                       Navigator.push(

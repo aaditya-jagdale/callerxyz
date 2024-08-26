@@ -1,26 +1,31 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CalendarDataNotifier extends StateNotifier<List<int>> {
-  CalendarDataNotifier() : super([]);
+class CalendarDataNotifier extends StateNotifier<Map<String, List<int>>> {
+  CalendarDataNotifier() : super({'isSuccessful': [], 'isConverted': []});
 
-  void setCalendarData(List<int> data) {
-    state = data;
+  void setCalendarData(String key, List<int> data) {
+    state = {...state, key: data};
   }
 
-  void addDate(int date) {
-    state = [...state, date];
+  void addDate(String key, int date) {
+    state = {
+      ...state,
+      key: [...state[key]!, date]
+    };
   }
 
-  void removeDate(int date) {
-    state = state.where((element) => element != date).toList();
+  void removeDate(String key, int date) {
+    state = {
+      ...state,
+      key: state[key]!.where((element) => element != date).toList()
+    };
   }
 
   void clearCalendarData() {
-    state = [];
+    state = {'isSuccessful': [], 'isConverted': []};
   }
 }
 
-final calendarDataProvider = StateNotifierProvider<CalendarDataNotifier, List<int>>((ref) {
+final calendarDataProvider = StateNotifierProvider<CalendarDataNotifier, Map<String, List<int>>>((ref) {
   return CalendarDataNotifier();
 });
-

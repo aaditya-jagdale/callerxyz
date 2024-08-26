@@ -65,7 +65,7 @@ class MainGraphCard extends StatelessWidget {
                       show: true,
                       getDotPainter: (spot, percent, barData, index) {
                         return FlDotCirclePainter(
-                          radius: 3,
+                          radius: 2,
                           color: CustomColors.black,
                           strokeWidth: 1,
                           strokeColor: CustomColors.white,

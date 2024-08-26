@@ -2,7 +2,6 @@ import 'package:callerxyz/modules/analytics/widget/main_graph_card.dart';
 import 'package:callerxyz/modules/analytics/widget/track_record_tile.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
-import 'package:callerxyz/riverpod/records_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -18,6 +17,10 @@ class Analytics extends ConsumerStatefulWidget {
 
 class _AnalyticsState extends ConsumerState<Analytics> {
   final supabase = Supabase.instance.client;
+  DateTime afterDate =
+      DateTime.now().subtract(Duration(days: DateTime.now().day));
+  List<DateTime> timeFrame = List.generate(
+      7, (index) => DateTime.now().subtract(Duration(days: index)));
   List<FlSpot> dialed = [];
   List<FlSpot> connected = [];
   List<FlSpot> meetings = [];
@@ -26,13 +29,10 @@ class _AnalyticsState extends ConsumerState<Analytics> {
 
   getUserData() async {
     List<RecordModel> results = widget.records;
-
     List<RecordModel> records = results;
-    // debugPrint("-------------------------all records: $records");
 
     final totalDialed = records
-        .where((record) => DateTime.parse(record.date)
-            .isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
         .map((record) => record.dialed != 0
             ? FlSpot(DateTime.parse(record.date).day.toDouble(),
                 record.dialed.toDouble())
@@ -42,8 +42,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
         .toList();
 
     final totalConnected = records
-        .where((record) => DateTime.parse(record.date)
-            .isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
         .map((record) => record.connected != 0
             ? FlSpot(DateTime.parse(record.date).day.toDouble(),
                 record.connected.toDouble())
@@ -53,8 +52,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
         .toList();
 
     final totalMeetings = records
-        .where((record) => DateTime.parse(record.date)
-            .isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
         .map((record) => record.meetings != 0
             ? FlSpot(DateTime.parse(record.date).day.toDouble(),
                 record.meetings.toDouble())
@@ -64,8 +62,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
         .toList();
 
     final totalConversions = records
-        .where((record) => DateTime.parse(record.date)
-            .isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
         .map((record) => record.conversions != 0
             ? FlSpot(DateTime.parse(record.date).day.toDouble(),
                 record.conversions.toDouble())
@@ -75,8 +72,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
         .toList();
 
     final totalDialToConnected = records
-        .where((record) => DateTime.parse(record.date)
-            .isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
         .map((record) => record.dialed != 0 && record.connected != 0
             ? FlSpot(DateTime.parse(record.date).day.toDouble(),
                 (record.connected / record.dialed * 100).toDouble())
@@ -84,6 +80,13 @@ class _AnalyticsState extends ConsumerState<Analytics> {
         .where((spot) => spot != null)
         .cast<FlSpot>()
         .toList();
+
+    debugPrint("-------------------------totalDialed: $totalDialed");
+    debugPrint("-------------------------totalConnected: $totalConnected");
+    debugPrint("-------------------------totalMeetings: $totalMeetings");
+    debugPrint("-------------------------totalConversions: $totalConversions");
+    debugPrint(
+        "-------------------------totalDialToConnected: ${totalDialToConnected.length}");
 
     setState(() {
       dialed = totalDialed;
@@ -96,7 +99,6 @@ class _AnalyticsState extends ConsumerState<Analytics> {
 
   @override
   void initState() {
-    getUserData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getUserData();
     });
@@ -106,16 +108,6 @@ class _AnalyticsState extends ConsumerState<Analytics> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: CustomColors.black,
-        onPressed: () {
-          getUserData();
-        },
-        child: const Icon(
-          Icons.refresh,
-          color: CustomColors.white,
-        ),
-      ),
       appBar: AppBar(
         titleSpacing: 0,
         title: const Text(
@@ -138,7 +130,15 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                 const SizedBox(width: 16),
                 GestureDetector(
                   onTap: () {
-                    // ref.read(analyticsProvider.notifier).updateSelectedIndex(0);
+                    afterDate = DateTime.now()
+                        .subtract(Duration(days: DateTime.now().weekday + 1));
+                    setState(() {
+                      timeFrame = List.generate(
+                          7,
+                          (index) =>
+                              DateTime.now().subtract(Duration(days: index)));
+                    });
+                    getUserData();
                   },
                   child: Container(
                     margin: const EdgeInsets.only(right: 8.0),
@@ -147,18 +147,33 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: CustomColors.black,
+                      color: timeFrame.length == 7
+                          ? CustomColors.black
+                          : CustomColors.black10,
                       borderRadius: BorderRadius.circular(100),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Last Week",
-                      style: TextStyle(color: CustomColors.white),
+                      style: TextStyle(
+                        color: timeFrame.length == 7
+                            ? CustomColors.white
+                            : CustomColors.black,
+                      ),
                     ),
                   ),
                 ),
                 GestureDetector(
                   onTap: () {
-                    // ref.read(analyticsProvider.notifier).updateSelectedIndex(1);
+                    afterDate =
+                        DateTime(DateTime.now().year, DateTime.now().month)
+                            .subtract(const Duration(days: 1));
+                    setState(() {
+                      timeFrame = List.generate(
+                          30,
+                          (index) =>
+                              DateTime.now().subtract(Duration(days: index)));
+                    });
+                    getUserData();
                   },
                   child: Container(
                     margin: const EdgeInsets.only(right: 8.0),
@@ -167,18 +182,32 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: CustomColors.black10,
+                      color: timeFrame.length == 30
+                          ? CustomColors.black
+                          : CustomColors.black10,
                       borderRadius: BorderRadius.circular(100),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Last Month",
-                      style: TextStyle(color: CustomColors.black),
+                      style: TextStyle(
+                        color: timeFrame.length == 30
+                            ? CustomColors.white
+                            : CustomColors.black,
+                      ),
                     ),
                   ),
                 ),
                 GestureDetector(
                   onTap: () {
-                    // ref.read(analyticsProvider.notifier).updateSelectedIndex(2);
+                    afterDate = DateTime(DateTime.now().year)
+                        .subtract(const Duration(days: 1));
+                    setState(() {
+                      timeFrame = List.generate(
+                          365,
+                          (index) =>
+                              DateTime.now().subtract(Duration(days: index)));
+                    });
+                    getUserData();
                   },
                   child: Container(
                     margin: const EdgeInsets.only(right: 8.0),
@@ -187,32 +216,18 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: CustomColors.black10,
+                      color: timeFrame.length == 365
+                          ? CustomColors.black
+                          : CustomColors.black10,
                       borderRadius: BorderRadius.circular(100),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Last Year",
-                      style: TextStyle(color: CustomColors.black),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    // ref.read(analyticsProvider.notifier).updateSelectedIndex(3);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 8.0),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: CustomColors.black10,
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: const Text(
-                      "All Time",
-                      style: TextStyle(color: CustomColors.black),
+                      style: TextStyle(
+                        color: timeFrame.length == 365
+                            ? CustomColors.white
+                            : CustomColors.black,
+                      ),
                     ),
                   ),
                 ),
@@ -226,18 +241,12 @@ class _AnalyticsState extends ConsumerState<Analytics> {
               children: [
                 MainGraphCard(
                   pointsList: dialed,
-                  timeFrame: List.generate(
-                      7,
-                      (index) =>
-                          DateTime.now().subtract(Duration(days: index))),
+                  timeFrame: timeFrame,
                   title: "Dialed Record",
                 ),
                 MainGraphCard(
                   pointsList: dialToConnected,
-                  timeFrame: List.generate(
-                      7,
-                      (index) =>
-                          DateTime.now().subtract(Duration(days: index))),
+                  timeFrame: timeFrame,
                   title: "Dial-to-Connect %",
                 ),
               ],

@@ -36,15 +36,28 @@ class _CallendarViewState extends ConsumerState<CallendarView> {
   getCalendarData() async {
     final data = await supabase
         .from('user_records')
-        .select("date")
+        .select("date, conversions")
         .eq("uid", supabase.auth.currentUser!.id)
         .neq("dialed", 0);
 
-    ref.read(calendarDataProvider.notifier).setCalendarData(data
-        .map<int>((e) => DateTime.now()
-            .difference(DateTime.parse(e["date"].toString()))
-            .inDays)
-        .toList());
+    ref.read(calendarDataProvider.notifier).setCalendarData(
+          'isSuccessful',
+          data
+              .map<int>((e) => DateTime.now()
+                  .difference(DateTime.parse(e["date"].toString()))
+                  .inDays)
+              .toList(),
+        );
+
+    ref.read(calendarDataProvider.notifier).setCalendarData(
+          'isConverted',
+          data
+              .where((e) => e["conversions"] != 0)
+              .map<int>((e) => DateTime.now()
+                  .difference(DateTime.parse(e["date"].toString()))
+                  .inDays)
+              .toList(),
+        );
 
     _isLoading = false;
   }
@@ -112,8 +125,12 @@ class _CallendarViewState extends ConsumerState<CallendarView> {
               itemCount: 365,
               itemBuilder: (context, index) {
                 int today = DateTime.now().weekday - 7;
-                bool isSuccessful =
-                    ref.watch(calendarDataProvider).contains(index + today);
+                bool isSuccessful = ref
+                    .watch(calendarDataProvider)['isSuccessful']!
+                    .contains(index + today);
+                bool isConverted = ref
+                    .watch(calendarDataProvider)['isConverted']!
+                    .contains(index + today);
 
                 if (mounted) {
                   return AnimatedContainer(
@@ -121,9 +138,11 @@ class _CallendarViewState extends ConsumerState<CallendarView> {
                     height: 10,
                     width: 10,
                     decoration: BoxDecoration(
-                      color: isSuccessful
-                          ? CustomColors.black25
-                          : CustomColors.black25.withOpacity(0.25),
+                      color: isConverted
+                          ? CustomColors.green
+                          : isSuccessful
+                              ? CustomColors.black25
+                              : CustomColors.black25.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   );

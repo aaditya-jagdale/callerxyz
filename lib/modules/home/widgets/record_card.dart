@@ -3,6 +3,7 @@ import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:callerxyz/modules/shared/widgets/transitions.dart';
+import 'package:callerxyz/riverpod/calendar_data.dart';
 import 'package:callerxyz/riverpod/record_data.dart';
 import 'package:callerxyz/riverpod/records_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,20 @@ class _RecordCardState extends ConsumerState<RecordCard> {
           ref
               .read(yourRecordsProvider.notifier)
               .updateRecord(RecordModel.fromJson(value[0]));
+
+          if (ref
+                  .read(yourRecordsProvider.notifier)
+                  .getRecord(RecordModel.fromJson(value[0]))
+                  .dialed ==
+              0) {
+            ref.read(calendarDataProvider.notifier).removeDate(DateTime.now()
+                .difference(DateTime.parse(widget.record.date))
+                .inDays);
+          } else {
+            ref.read(calendarDataProvider.notifier).addDate(DateTime.now()
+                .difference(DateTime.parse(widget.record.date))
+                .inDays);
+          }
         })
         .onError((error, stackTrace) {
           errorSnackBar(context, "Error updating record");

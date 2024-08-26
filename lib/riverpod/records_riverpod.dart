@@ -32,6 +32,10 @@ class YourRecordsNotifier extends StateNotifier<RecordState> {
     state = RecordState(records: [...state.records, record]);
   }
 
+  RecordModel getRecord(RecordModel record) {
+    return state.records.firstWhere((element) => element.id == record.id);
+  }
+
   void updateRecord(RecordModel updatedRecord) {
     state = RecordState(records: [
       for (final record in state.records)

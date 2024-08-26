@@ -5,8 +5,10 @@ import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:callerxyz/modules/shared/widgets/transitions.dart';
+import 'package:callerxyz/riverpod/calendar_data.dart';
 import 'package:callerxyz/riverpod/record_data.dart';
 import 'package:callerxyz/riverpod/records_riverpod.dart';
+import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -121,6 +123,17 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
                         ref
                             .watch(yourRecordsProvider.notifier)
                             .setTodayRecord(RecordModel.fromJson(record[0]));
+
+                        if (ref.watch(yourRecordsProvider).todayRecord.dialed ==
+                            0) {
+                          ref.read(calendarDataProvider.notifier).removeDate(
+                              DateTime.now()
+                                  .difference(DateTime.parse(
+                                      ref.read(recordDataController).date))
+                                  .inDays);
+                        } else {
+                          ref.read(calendarDataProvider.notifier).addDate(0);
+                        }
                       } else {
                         debugPrint("No record found for today");
                       }
@@ -156,6 +169,16 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
                         size: 18,
                       )
                     ],
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 6),
+                  child: DottedLine(
+                    dashColor: CustomColors.black50,
+                    dashGapLength: 4,
+                    dashLength: 4,
+                    lineThickness: 1,
+                    dashRadius: 0,
                   ),
                 ),
                 TodayTile(

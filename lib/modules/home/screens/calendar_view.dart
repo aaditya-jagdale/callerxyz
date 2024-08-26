@@ -1,22 +1,23 @@
 import 'dart:math';
 
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
+import 'package:callerxyz/riverpod/calendar_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class CallendarView extends StatefulWidget {
+class CallendarView extends ConsumerStatefulWidget {
   const CallendarView({super.key});
 
   @override
-  State<CallendarView> createState() => _CallendarViewState();
+  ConsumerState<CallendarView> createState() => _CallendarViewState();
 }
 
-class _CallendarViewState extends State<CallendarView> {
+class _CallendarViewState extends ConsumerState<CallendarView> {
   final supabase = Supabase.instance.client;
   bool _isLoading = true;
-  List<int> dates = [];
   final startDate = DateTime.now().subtract(const Duration(days: 365 - 1));
 
   insertRecord() async {
@@ -38,14 +39,14 @@ class _CallendarViewState extends State<CallendarView> {
         .select("date")
         .eq("uid", supabase.auth.currentUser!.id)
         .neq("dialed", 0);
-    setState(() {
-      dates = data
-          .map<int>((e) => DateTime.now()
-              .difference(DateTime.parse(e["date"].toString()))
-              .inDays)
-          .toList();
-      _isLoading = false;
-    });
+
+    ref.read(calendarDataProvider.notifier).setCalendarData(data
+        .map<int>((e) => DateTime.now()
+            .difference(DateTime.parse(e["date"].toString()))
+            .inDays)
+        .toList());
+
+    _isLoading = false;
   }
 
   @override
@@ -111,10 +112,12 @@ class _CallendarViewState extends State<CallendarView> {
               itemCount: 365,
               itemBuilder: (context, index) {
                 int today = DateTime.now().weekday - 7;
-                bool isSuccessful = dates.contains(index - today);
+                bool isSuccessful =
+                    ref.watch(calendarDataProvider).contains(index + today);
 
                 if (mounted) {
-                  return Container(
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 500),
                     height: 10,
                     width: 10,
                     decoration: BoxDecoration(

@@ -1,16 +1,17 @@
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 
 class MainGraphCard extends StatelessWidget {
   final List<FlSpot> pointsList;
-  final List<DateTime> timeFrame;
+  // final List<DateTime> timeFrame;
   final String title;
 
   const MainGraphCard({
     super.key,
     required this.pointsList,
-    required this.timeFrame,
+    // required this.timeFrame,
     required this.title,
   });
 
@@ -72,18 +73,7 @@ class MainGraphCard extends StatelessWidget {
                         );
                       },
                     ),
-                    spots: timeFrame.map((day) {
-                      if (pointsList
-                          .any((spot) => spot.x == day.day.toDouble())) {
-                        return FlSpot(
-                            day.day.toDouble(),
-                            pointsList
-                                .firstWhere(
-                                    (spot) => spot.x == day.day.toDouble())
-                                .y);
-                      }
-                      return FlSpot(day.day.toDouble(), 0);
-                    }).toList(),
+                    spots: pointsList,
                   ),
                 ],
                 titlesData: FlTitlesData(
@@ -113,10 +103,10 @@ class MainGraphCard extends StatelessWidget {
                       showTitles: true,
                       reservedSize: 24,
                       getTitlesWidget: (value, meta) {
-                        DateTime date = timeFrame
-                            .firstWhere((day) => day.day == value.toInt());
+                        DateTime date = DateTime.now()
+                            .subtract(Duration(days: value.toInt()));
                         return Text(
-                          "${date.day}/${date.month}",
+                          DateFormat('dd/MM').format(date),
                           style: const TextStyle(fontSize: 12),
                         );
                       },

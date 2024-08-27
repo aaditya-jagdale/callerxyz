@@ -1,5 +1,4 @@
 import 'package:callerxyz/modules/home/widgets/record_card.dart';
-import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/riverpod/records_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

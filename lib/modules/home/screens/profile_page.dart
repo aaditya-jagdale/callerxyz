@@ -1,5 +1,4 @@
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
-import 'package:callerxyz/modules/shared/widgets/custom_buttons.dart';
 import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:callerxyz/modules/shared/widgets/textfields.dart';
 import 'package:callerxyz/onboarding_page.dart';
@@ -18,7 +17,6 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
   bool _resettingPassword = false;
   final supabase = Supabase.instance.client;
 
@@ -31,7 +29,6 @@ class _ProfilePageState extends State<ProfilePage> {
       if (data.isNotEmpty) {
         _nameController.text = data[0]['name'] ?? '';
         _emailController.text = data[0]['email'] ?? '';
-        _locationController.text = data[0]['location'] ?? '';
       }
     });
   }
@@ -54,61 +51,6 @@ class _ProfilePageState extends State<ProfilePage> {
       });
       errorSnackBar(context, error.toString());
     });
-  }
-
-  updateValueBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (context) {
-        TextEditingController _emailController = TextEditingController();
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Wrap(
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CustomTextField(
-                    controller: _emailController,
-                    title: "Update Email",
-                  ),
-                  const SizedBox(height: 10),
-                  CustomPrimaryButton(
-                    title: "Change",
-                    onTap: () async {
-                      if (_emailController.text.trim().isNotEmpty &&
-                          _emailController.text.trim().contains('@') &&
-                          _emailController.text.trim().contains('.')) {
-                        await supabase.auth
-                            .updateUser(
-                          UserAttributes(email: _emailController.text.trim()),
-                        )
-                            .then((value) {
-                          {
-                            successSnackBar(context, 'Email updated');
-                            Navigator.pop(context);
-                          }
-                        }).onError((error, stackTrace) {
-                          errorSnackBar(context, error.toString());
-                          Navigator.pop(context);
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              )
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -135,19 +77,10 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             CustomTextField(title: 'Name', controller: _nameController),
-            GestureDetector(
-              onTap: () {
-                updateValueBottomSheet();
-              },
-              child: CustomTextField(
-                title: 'Email',
-                controller: _emailController,
-                isEnabled: false,
-              ),
-            ),
             CustomTextField(
-              title: 'Location',
-              controller: _locationController,
+              title: 'Email',
+              controller: _emailController,
+              isEnabled: false,
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 6),

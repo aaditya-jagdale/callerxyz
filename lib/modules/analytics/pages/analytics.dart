@@ -18,82 +18,125 @@ class Analytics extends ConsumerStatefulWidget {
 class _AnalyticsState extends ConsumerState<Analytics> {
   final supabase = Supabase.instance.client;
   DateTime afterDate =
-      DateTime.now().subtract(Duration(days: DateTime.now().day));
-  List<DateTime> timeFrame = List.generate(
-      7, (index) => DateTime.now().subtract(Duration(days: index)));
+      DateTime.now().subtract(Duration(days: DateTime.now().weekday + 1));
+  int timeFrameIndex = 0;
   List<FlSpot> dialed = [];
   List<FlSpot> connected = [];
   List<FlSpot> meetings = [];
   List<FlSpot> conversions = [];
   List<FlSpot> dialToConnected = [];
+  int totalDialed = 0;
+  int totalConnected = 0;
+  int totalMeetings = 0;
+  int totalConversions = 0;
 
   getUserData() async {
     List<RecordModel> results = widget.records;
     List<RecordModel> records = results;
 
-    final totalDialed = records
+    totalDialed = records
         .where((record) => DateTime.parse(record.date).isAfter(afterDate))
-        .map((record) => record.dialed != 0
-            ? FlSpot(DateTime.parse(record.date).day.toDouble(),
-                record.dialed.toDouble())
-            : null)
-        .where((spot) => spot != null)
-        .cast<FlSpot>()
+        .map((record) => record.dialed)
+        .reduce((a, b) => a + b)
+        .toInt();
+
+    totalConnected = records
+        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
+        .map((record) => record.connected)
+        .reduce((a, b) => a + b)
+        .toInt();
+
+    totalMeetings = records
+        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
+        .map((record) => record.meetings)
+        .reduce((a, b) => a + b)
+        .toInt();
+
+    totalConversions = records
+        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
+        .map((record) => record.conversions)
+        .reduce((a, b) => a + b)
+        .toInt();
+
+    final dialedList = records
+        .where((record) =>
+            DateTime.parse(record.date).isAfter(afterDate) &&
+            record.dialed != 0)
+        .map((record) => FlSpot(
+            DateTime.now()
+                    .difference(DateTime.parse(record.date))
+                    .inDays
+                    .toDouble() *
+                -1,
+            record.dialed.toDouble()))
         .toList();
 
-    final totalConnected = records
-        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
-        .map((record) => record.connected != 0
-            ? FlSpot(DateTime.parse(record.date).day.toDouble(),
-                record.connected.toDouble())
-            : null)
-        .where((spot) => spot != null)
-        .cast<FlSpot>()
+    final connectedList = records
+        .where((record) =>
+            DateTime.parse(record.date).isAfter(afterDate) &&
+            record.connected != 0)
+        .map((record) => FlSpot(
+            DateTime.now()
+                    .difference(DateTime.parse(record.date))
+                    .inDays
+                    .toDouble() *
+                -1,
+            record.connected.toDouble()))
         .toList();
 
-    final totalMeetings = records
-        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
-        .map((record) => record.meetings != 0
-            ? FlSpot(DateTime.parse(record.date).day.toDouble(),
-                record.meetings.toDouble())
-            : null)
-        .where((spot) => spot != null)
-        .cast<FlSpot>()
+    final meetingList = records
+        .where((record) =>
+            DateTime.parse(record.date).isAfter(afterDate) &&
+            record.meetings != 0)
+        .map((record) => FlSpot(
+            DateTime.now()
+                    .difference(DateTime.parse(record.date))
+                    .inDays
+                    .toDouble() *
+                -1,
+            record.meetings.toDouble()))
         .toList();
 
-    final totalConversions = records
-        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
-        .map((record) => record.conversions != 0
-            ? FlSpot(DateTime.parse(record.date).day.toDouble(),
-                record.conversions.toDouble())
-            : null)
-        .where((spot) => spot != null)
-        .cast<FlSpot>()
+    final conversionsList = records
+        .where((record) =>
+            DateTime.parse(record.date).isAfter(afterDate) &&
+            record.conversions != 0)
+        .map((record) => FlSpot(
+            DateTime.now()
+                    .difference(DateTime.parse(record.date))
+                    .inDays
+                    .toDouble() *
+                -1,
+            record.conversions.toDouble()))
         .toList();
 
-    final totalDialToConnected = records
-        .where((record) => DateTime.parse(record.date).isAfter(afterDate))
-        .map((record) => record.dialed != 0 && record.connected != 0
-            ? FlSpot(DateTime.parse(record.date).day.toDouble(),
-                (record.connected / record.dialed * 100).toDouble())
-            : null)
-        .where((spot) => spot != null)
-        .cast<FlSpot>()
+    final dialToConnectList = records
+        .where((record) =>
+            DateTime.parse(record.date).isAfter(afterDate) &&
+            record.dialed != 0 &&
+            record.connected != 0)
+        .map((record) => FlSpot(
+            DateTime.now()
+                    .difference(DateTime.parse(record.date))
+                    .inDays
+                    .toDouble() *
+                -1,
+            (record.connected / record.dialed * 100).toDouble()))
         .toList();
 
-    debugPrint("-------------------------totalDialed: $totalDialed");
-    debugPrint("-------------------------totalConnected: $totalConnected");
-    debugPrint("-------------------------totalMeetings: $totalMeetings");
-    debugPrint("-------------------------totalConversions: $totalConversions");
+    debugPrint("-------------------------totalDialed: $dialedList");
+    debugPrint("-------------------------totalConnected: $connectedList");
+    debugPrint("-------------------------totalMeetings: $meetingList");
+    debugPrint("-------------------------totalConversions: $conversionsList");
     debugPrint(
-        "-------------------------totalDialToConnected: ${totalDialToConnected.length}");
+        "-------------------------totalDialToConnected: ${dialToConnectList.length}");
 
     setState(() {
-      dialed = totalDialed;
-      connected = totalConnected;
-      meetings = totalMeetings;
-      conversions = totalConversions;
-      dialToConnected = totalDialToConnected;
+      dialed = dialedList;
+      connected = connectedList;
+      meetings = meetingList;
+      conversions = conversionsList;
+      dialToConnected = dialToConnectList;
     });
   }
 
@@ -130,14 +173,10 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                 const SizedBox(width: 16),
                 GestureDetector(
                   onTap: () {
+                    timeFrameIndex = 0;
                     afterDate = DateTime.now()
                         .subtract(Duration(days: DateTime.now().weekday + 1));
-                    setState(() {
-                      timeFrame = List.generate(
-                          7,
-                          (index) =>
-                              DateTime.now().subtract(Duration(days: index)));
-                    });
+
                     getUserData();
                   },
                   child: Container(
@@ -147,7 +186,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: timeFrame.length == 7
+                      color: timeFrameIndex == 0
                           ? CustomColors.black
                           : CustomColors.black10,
                       borderRadius: BorderRadius.circular(100),
@@ -155,7 +194,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                     child: Text(
                       "Last Week",
                       style: TextStyle(
-                        color: timeFrame.length == 7
+                        color: timeFrameIndex == 0
                             ? CustomColors.white
                             : CustomColors.black,
                       ),
@@ -168,10 +207,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                         DateTime(DateTime.now().year, DateTime.now().month)
                             .subtract(const Duration(days: 1));
                     setState(() {
-                      timeFrame = List.generate(
-                          30,
-                          (index) =>
-                              DateTime.now().subtract(Duration(days: index)));
+                      timeFrameIndex = 1;
                     });
                     getUserData();
                   },
@@ -182,7 +218,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: timeFrame.length == 30
+                      color: timeFrameIndex == 1
                           ? CustomColors.black
                           : CustomColors.black10,
                       borderRadius: BorderRadius.circular(100),
@@ -190,7 +226,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                     child: Text(
                       "Last Month",
                       style: TextStyle(
-                        color: timeFrame.length == 30
+                        color: timeFrameIndex == 1
                             ? CustomColors.white
                             : CustomColors.black,
                       ),
@@ -202,10 +238,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                     afterDate = DateTime(DateTime.now().year)
                         .subtract(const Duration(days: 1));
                     setState(() {
-                      timeFrame = List.generate(
-                          365,
-                          (index) =>
-                              DateTime.now().subtract(Duration(days: index)));
+                      timeFrameIndex = 2;
                     });
                     getUserData();
                   },
@@ -216,7 +249,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: timeFrame.length == 365
+                      color: timeFrameIndex == 2
                           ? CustomColors.black
                           : CustomColors.black10,
                       borderRadius: BorderRadius.circular(100),
@@ -224,7 +257,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                     child: Text(
                       "Last Year",
                       style: TextStyle(
-                        color: timeFrame.length == 365
+                        color: timeFrameIndex == 2
                             ? CustomColors.white
                             : CustomColors.black,
                       ),
@@ -241,12 +274,12 @@ class _AnalyticsState extends ConsumerState<Analytics> {
               children: [
                 MainGraphCard(
                   pointsList: dialed,
-                  timeFrame: timeFrame,
+                  // timeFrame: timeFrame,
                   title: "Dialed Record",
                 ),
                 MainGraphCard(
                   pointsList: dialToConnected,
-                  timeFrame: timeFrame,
+                  // timeFrame: timeFrame,
                   title: "Dial-to-Connect %",
                 ),
               ],
@@ -265,11 +298,10 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                TrackRecordTile(title: "Dialed", value: dialed.length),
-                TrackRecordTile(title: "Connected", value: connected.length),
-                TrackRecordTile(title: "Meetings", value: meetings.length),
-                TrackRecordTile(
-                    title: "Conversions", value: conversions.length),
+                TrackRecordTile(title: "Dialed", value: totalDialed),
+                TrackRecordTile(title: "Connected", value: totalConnected),
+                TrackRecordTile(title: "Meetings", value: totalMeetings),
+                TrackRecordTile(title: "Conversions", value: totalConversions),
               ],
             ),
           )

@@ -66,7 +66,7 @@ class YourRecordsNotifier extends StateNotifier<RecordState> {
   }
 
   void clearRecords() {
-    state = RecordState(records: [], todayRecord: RecordModel());
+    state = RecordState(records: [], todayRecord: const RecordModel());
   }
 }
 

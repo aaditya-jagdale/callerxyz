@@ -31,24 +31,14 @@ class _AllRecordsState extends ConsumerState<AllRecords> {
                   child: Text("No calling history"),
                 ),
               )
-            : SingleChildScrollView(
-                child: Column(
-                  children: [
-                    RecordCard(
-                        record: ref.watch(yourRecordsProvider).todayRecord),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: ref.watch(yourRecordsProvider).records.length,
-                      itemBuilder: (context, index) {
-                        final record =
-                            ref.watch(yourRecordsProvider).records[index];
-                        return RecordCard(record: record);
-                      },
-                    ),
-                    const SizedBox(height: 50),
-                  ],
-                ),
+            : ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: ref.watch(yourRecordsProvider).records.length,
+                itemBuilder: (context, index) {
+                  final record = ref.watch(yourRecordsProvider).records[index];
+                  return RecordCard(record: record);
+                },
               ),
       ),
     );

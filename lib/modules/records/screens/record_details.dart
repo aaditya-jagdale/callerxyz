@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:callerxyz/modules/records/widget/record_info_list.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
@@ -10,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:confetti/confetti.dart';
 
 class RecordDetails extends ConsumerStatefulWidget {
   final RecordModel? record;
@@ -23,6 +26,33 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
   final _controller = TextEditingController();
   bool _loading = true;
   final supabase = Supabase.instance.client;
+
+  ConfettiController _confettiController =
+      ConfettiController(duration: const Duration(seconds: 5));
+
+  Path drawStar(Size size) {
+    // Method to convert degree to radians
+    double degToRad(double deg) => deg * (pi / 180.0);
+
+    const numberOfPoints = 3;
+    final halfWidth = size.width / 2;
+    final externalRadius = halfWidth;
+    final internalRadius = halfWidth / 2.5;
+    final degreesPerStep = degToRad(360 / numberOfPoints);
+    final halfDegreesPerStep = degreesPerStep / 2;
+    final path = Path();
+    final fullAngle = degToRad(360);
+    path.moveTo(size.width, halfWidth);
+
+    for (double step = 0; step < fullAngle; step += degreesPerStep) {
+      path.lineTo(halfWidth + externalRadius * cos(step),
+          halfWidth + externalRadius * sin(step));
+      path.lineTo(halfWidth + internalRadius * cos(step + halfDegreesPerStep),
+          halfWidth + internalRadius * sin(step + halfDegreesPerStep));
+    }
+    path.close();
+    return path;
+  }
 
   infoBottomSheet() {
     showModalBottomSheet(
@@ -190,6 +220,8 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(
+        "--------------------------------------${ref.read(recordDataController).date}");
     return Scaffold(
       appBar: _loading
           ? null
@@ -224,7 +256,20 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  //Total Dialed
+                  ConfettiWidget(
+                    confettiController: _confettiController,
+                    blastDirectionality: BlastDirectionality
+                        .explosive, // don't specify a direction, blast randomly
+                    shouldLoop: false,
+                    colors: const [
+                      Colors.green,
+                      Colors.blue,
+                      Colors.pink,
+                      Colors.orange,
+                      Colors.purple
+                    ],
+                    createParticlePath: drawStar,
+                  ),
                   RecordInfoList(
                     icon: SizedBox(
                       height: 20,
@@ -421,6 +466,11 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                       ref
                           .read(recordDataController.notifier)
                           .conversionsIncrement();
+
+                      if (ref.read(recordDataController).conversions <=
+                          ref.read(recordDataController).meetings) {
+                        _confettiController.play();
+                      }
                     },
                     onDecrement: () {
                       ref

@@ -1,12 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
-import 'package:intl/intl.dart';
 
 class RecordState {
   final List<RecordModel> records;
-  final RecordModel todayRecord;
 
-  RecordState({required this.records, required this.todayRecord});
+  RecordState({required this.records});
 
   List<RecordModel> get sortedRecords {
     return List.from(records)..sort((a, b) => b.date.compareTo(a.date));
@@ -14,29 +12,14 @@ class RecordState {
 }
 
 class YourRecordsNotifier extends StateNotifier<RecordState> {
-  YourRecordsNotifier()
-      : super(RecordState(records: [], todayRecord: const RecordModel()));
-
-  void setTodayRecord(RecordModel record) {
-    state = RecordState(records: state.records, todayRecord: record);
-  }
+  YourRecordsNotifier() : super(RecordState(records: []));
 
   void setRecords(List<RecordModel> records) {
-    final todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final todayRecord = records.firstWhere(
-      (e) => e.date == todayDate,
-      orElse: () => const RecordModel(),
-    );
-
-    state = RecordState(
-      records: records.where((e) => e.date != todayDate).toList(),
-      todayRecord: todayRecord,
-    );
+    state = RecordState(records: records);
   }
 
   void addRecord(RecordModel record) {
-    state = RecordState(
-        records: [...state.records, record], todayRecord: state.todayRecord);
+    state = RecordState(records: [...state.records, record]);
   }
 
   RecordModel getRecord(RecordModel record) {
@@ -44,29 +27,22 @@ class YourRecordsNotifier extends StateNotifier<RecordState> {
   }
 
   void updateRecord(RecordModel updatedRecord) {
-    final todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    if (updatedRecord.date == todayDate) {
-      state = RecordState(records: state.records, todayRecord: updatedRecord);
-    } else {
-      state = RecordState(
-        records: [
-          for (final record in state.records)
-            if (record.id == updatedRecord.id) updatedRecord else record
-        ],
-        todayRecord: state.todayRecord,
-      );
-    }
+    state = RecordState(
+      records: [
+        for (final record in state.records)
+          if (record.id == updatedRecord.id) updatedRecord else record
+      ],
+    );
   }
 
   void removeRecord(String recordId) {
     state = RecordState(
       records: state.records.where((record) => record.id != recordId).toList(),
-      todayRecord: state.todayRecord,
     );
   }
 
   void clearRecords() {
-    state = RecordState(records: [], todayRecord: const RecordModel());
+    state = RecordState(records: []);
   }
 }
 

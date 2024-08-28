@@ -44,6 +44,7 @@ app.*.map.json
 
 
 .env
-./lib/firebase_options.dart
+/lib/firebase_options.dart
 android/app/google-services.json
-.firebase.json
+firebase.json
+upload-keystore.jks

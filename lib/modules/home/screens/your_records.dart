@@ -30,39 +30,40 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
   final supabase = Supabase.instance.client;
   bool _loading = true;
 
-  createTodayRecord() {
-    supabase.from('user_records').insert({
-      "date": DateTime.now().toIso8601String(),
-      "day": DateFormat('EEEE').format(DateTime.now()),
-      "dialed": 0,
-      "connected": 0,
-      "meetings": 0,
-      "callbacks": 0,
+  Future createTodayRecord() async {
+    await supabase.from('user_records').insert({
+      "uid": supabase.auth.currentUser!.id,
+      "date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
     }).then((value) {
-      debugPrint("----------------new record created");
       getUserRecord();
+      debugPrint("----------------new record created");
     }).catchError((error) {
       debugPrint("----------------error creating record: $error");
     });
   }
 
   //functions
-  getUserRecord() {
-    supabase
+  getUserRecord() async {
+    await supabase
         .from("user_records")
         .select()
         .eq("uid", supabase.auth.currentUser!.id)
-        .select()
+        .select("*")
         .order('date')
         .then((results) {
+      debugPrint("----------------results: $results");
       if (results.isEmpty) {
         createTodayRecord();
       } else {
+        if (results[0]['date'] !=
+            DateFormat("yyyy-MM-dd").format(DateTime.now())) {
+          createTodayRecord();
+        }
+
         ref
             .watch(yourRecordsProvider.notifier)
             .setRecords(results.map((e) => RecordModel.fromJson(e)).toList());
       }
-
       setState(() {
         _loading = false;
       });
@@ -77,7 +78,9 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
 
   @override
   void initState() {
-    getUserRecord();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getUserRecord();
+    });
     super.initState();
   }
 
@@ -88,106 +91,110 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Today's record
-        GestureDetector(
-          onTap: () {
-            rightSlideTransition(
-                context,
-                RecordDetails(
-                    record: ref.watch(yourRecordsProvider).todayRecord),
-                onComplete: () async {
-              {
-                await supabase
-                    .from('user_records')
-                    .update({
-                      'dialed': ref.watch(recordDataController).totalDialed,
-                      'connected': ref.watch(recordDataController).connected,
-                      'meetings': ref.watch(recordDataController).meetings,
-                      'conversions':
-                          ref.watch(recordDataController).conversions,
-                      'callbacks': ref.watch(recordDataController).callbackReq,
-                    })
-                    .eq('uid', supabase.auth.currentUser!.id)
-                    .eq('id', ref.watch(yourRecordsProvider).todayRecord.id)
-                    .select()
-                    .then((record) {
-                      if (record.isNotEmpty) {
-                        ref
-                            .watch(yourRecordsProvider.notifier)
-                            .updateRecord(RecordModel.fromJson(record[0]));
-                        if (record[0]['dialed'] == 0) {
+        if (!_loading)
+          GestureDetector(
+            onTap: () {
+              rightSlideTransition(
+                  context,
+                  RecordDetails(
+                      record: ref.watch(yourRecordsProvider).records[0]),
+                  onComplete: () async {
+                {
+                  await supabase
+                      .from('user_records')
+                      .update({
+                        'dialed': ref.watch(recordDataController).totalDialed,
+                        'connected': ref.watch(recordDataController).connected,
+                        'meetings': ref.watch(recordDataController).meetings,
+                        'conversions':
+                            ref.watch(recordDataController).conversions,
+                        'callbacks':
+                            ref.watch(recordDataController).callbackReq,
+                      })
+                      .eq('uid', supabase.auth.currentUser!.id)
+                      .eq('id', ref.watch(yourRecordsProvider).records[0].id)
+                      .select()
+                      .then((record) {
+                        if (record.isNotEmpty) {
                           ref
-                              .watch(calendarDataProvider.notifier)
-                              .removeDate('isConverted', 0);
-                        } else {
-                          ref.watch(calendarDataProvider.notifier).addDate('isConverted', 0);
+                              .watch(yourRecordsProvider.notifier)
+                              .updateRecord(RecordModel.fromJson(record[0]));
+                          if (record[0]['dialed'] == 0) {
+                            ref
+                                .watch(calendarDataProvider.notifier)
+                                .removeDate('isConverted', 0);
+                          } else {
+                            ref
+                                .watch(calendarDataProvider.notifier)
+                                .addDate('isConverted', 0);
+                          }
                         }
-                      }
-                    })
-                    .catchError((error, stackTrace) {
-                      debugPrint("Error updating record: $error");
-                      errorSnackBar(context, "Error updating record");
-                    });
-              }
-            });
-          },
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: CustomColors.black10,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 6),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Today",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 18,
-                      )
-                    ],
+                      })
+                      .catchError((error, stackTrace) {
+                        debugPrint("Error updating record: $error");
+                        errorSnackBar(context, "Error updating record");
+                      });
+                }
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: CustomColors.black10,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Today",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 18,
+                        )
+                      ],
+                    ),
                   ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 6),
-                  child: DottedLine(
-                    dashColor: CustomColors.black50,
-                    dashGapLength: 4,
-                    dashLength: 4,
-                    lineThickness: 1,
-                    dashRadius: 0,
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 6),
+                    child: DottedLine(
+                      dashColor: CustomColors.black50,
+                      dashGapLength: 4,
+                      dashLength: 4,
+                      lineThickness: 1,
+                      dashRadius: 0,
+                    ),
                   ),
-                ),
-                TodayTile(
-                  title: 'Dialed',
-                  icon: SvgPicture.asset(
-                    "assets/phone_outgoing.svg",
-                    height: 20,
-                    width: 20,
+                  TodayTile(
+                    title: 'Dialed',
+                    icon: SvgPicture.asset(
+                      "assets/phone_outgoing.svg",
+                      height: 20,
+                      width: 20,
+                    ),
+                    value: ref.watch(yourRecordsProvider).records[0].dialed,
                   ),
-                  value: ref.watch(yourRecordsProvider).todayRecord.dialed,
-                ),
-                TodayTile(
-                  title: 'Connected',
-                  icon: SvgPicture.asset(
-                    "assets/chat.svg",
-                    height: 20,
-                    width: 20,
+                  TodayTile(
+                    title: 'Connected',
+                    icon: SvgPicture.asset(
+                      "assets/chat.svg",
+                      height: 20,
+                      width: 20,
+                    ),
+                    value: ref.watch(yourRecordsProvider).records[0].connected,
                   ),
-                  value: ref.watch(yourRecordsProvider).todayRecord.connected,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
         const SizedBox(height: 10),
 
         // Your Record

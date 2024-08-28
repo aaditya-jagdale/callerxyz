@@ -105,10 +105,21 @@ class MainGraphCard extends StatelessWidget {
                       getTitlesWidget: (value, meta) {
                         DateTime date = DateTime.now()
                             .subtract(Duration(days: value.toInt()));
-                        return Text(
-                          DateFormat('dd/MM').format(date),
-                          style: const TextStyle(fontSize: 12),
-                        );
+                        //only display first and last dates
+                        if (value.toInt() == 0) {
+                          return Text(
+                            DateFormat('dd/MM').format(date),
+                            style: const TextStyle(fontSize: 12),
+                          );
+                        }
+                        if (value.toInt() ==
+                            pointsList[pointsList.length - 1].x) {
+                          return Text(
+                            DateFormat('dd/MM').format(date),
+                            style: const TextStyle(fontSize: 12),
+                          );
+                        }
+                        return const SizedBox();
                       },
                     ),
                   ),

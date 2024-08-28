@@ -28,31 +28,7 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
   final supabase = Supabase.instance.client;
 
   ConfettiController _confettiController =
-      ConfettiController(duration: const Duration(seconds: 5));
-
-  Path drawStar(Size size) {
-    // Method to convert degree to radians
-    double degToRad(double deg) => deg * (pi / 180.0);
-
-    const numberOfPoints = 3;
-    final halfWidth = size.width / 2;
-    final externalRadius = halfWidth;
-    final internalRadius = halfWidth / 2.5;
-    final degreesPerStep = degToRad(360 / numberOfPoints);
-    final halfDegreesPerStep = degreesPerStep / 2;
-    final path = Path();
-    final fullAngle = degToRad(360);
-    path.moveTo(size.width, halfWidth);
-
-    for (double step = 0; step < fullAngle; step += degreesPerStep) {
-      path.lineTo(halfWidth + externalRadius * cos(step),
-          halfWidth + externalRadius * sin(step));
-      path.lineTo(halfWidth + internalRadius * cos(step + halfDegreesPerStep),
-          halfWidth + internalRadius * sin(step + halfDegreesPerStep));
-    }
-    path.close();
-    return path;
-  }
+      ConfettiController(duration: const Duration(seconds: 1));
 
   infoBottomSheet() {
     showModalBottomSheet(
@@ -258,8 +234,8 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                 children: [
                   ConfettiWidget(
                     confettiController: _confettiController,
-                    blastDirectionality: BlastDirectionality
-                        .explosive, // don't specify a direction, blast randomly
+                    blastDirectionality: BlastDirectionality.explosive,
+                    emissionFrequency: 0.1,
                     shouldLoop: false,
                     colors: const [
                       Colors.green,
@@ -268,7 +244,6 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                       Colors.orange,
                       Colors.purple
                     ],
-                    createParticlePath: drawStar,
                   ),
                   RecordInfoList(
                     icon: SizedBox(
@@ -463,14 +438,13 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                       );
                     },
                     onIncremenet: () {
-                      ref
-                          .read(recordDataController.notifier)
-                          .conversionsIncrement();
-
-                      if (ref.read(recordDataController).conversions <=
+                      if (ref.read(recordDataController).conversions <
                           ref.read(recordDataController).meetings) {
                         _confettiController.play();
                       }
+                      ref
+                          .read(recordDataController.notifier)
+                          .conversionsIncrement();
                     },
                     onDecrement: () {
                       ref

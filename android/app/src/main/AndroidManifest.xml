@@ -2,7 +2,7 @@
     <application
         android:label="callerxyz"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
@@ -25,8 +25,8 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <data
-                android:scheme="https"
-                android:host="hroydrwkrmfrcupmvbhb.supabase.co" />
+                android:scheme="io.supabase.flutterquickstart"
+                android:host="callerxyz-callback" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

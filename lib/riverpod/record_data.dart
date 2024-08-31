@@ -198,6 +198,9 @@ class RecordDataProvider extends StateNotifier<RecordState> {
     return state.conversions / state.meetings;
   }
 
+
+  
+
   void reset() {
     state = RecordState();
   }

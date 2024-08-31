@@ -1,9 +1,12 @@
+import 'package:callerxyz/modules/analytics/pages/analytics.dart';
 import 'package:callerxyz/modules/home/screens/calendar_view.dart';
 import 'package:callerxyz/modules/home/screens/profile_page.dart';
 import 'package:callerxyz/modules/home/screens/your_records.dart';
+import 'package:callerxyz/modules/shared/widgets/transitions.dart';
 import 'package:callerxyz/riverpod/fcm_init.dart';
 import 'package:callerxyz/modules/shared/screens/user_info.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
+import 'package:callerxyz/riverpod/records_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -101,16 +104,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 context: context,
                 position: const RelativeRect.fromLTRB(100, 90, 15, 0),
                 items: [
-                  const PopupMenuItem(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.analytics_outlined),
-                        SizedBox(width: 10),
-                        Text('Analytics'),
-                      ],
+                  if (ref.watch(yourRecordsProvider).records.isNotEmpty)
+                    PopupMenuItem(
+                      onTap: () {
+                        fadeTransition(
+                          context,
+                          Analytics(
+                            records: ref.watch(yourRecordsProvider).records
+                              ..sort((a, b) => DateTime.parse(b.date)
+                                  .compareTo(DateTime.parse(a.date))),
+                          ),
+                        );
+                      },
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.analytics_outlined),
+                          SizedBox(width: 10),
+                          Text('Analytics'),
+                        ],
+                      ),
                     ),
-                  ),
                   PopupMenuItem(
                     onTap: () {
                       Navigator.push(

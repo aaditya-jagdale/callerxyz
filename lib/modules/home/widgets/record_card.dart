@@ -3,6 +3,7 @@ import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:callerxyz/modules/shared/widgets/transitions.dart';
+import 'package:callerxyz/riverpod/calendar_data.dart';
 import 'package:callerxyz/riverpod/record_data.dart';
 import 'package:callerxyz/riverpod/records_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -35,9 +36,27 @@ class _RecordCardState extends ConsumerState<RecordCard> {
         .eq('id', widget.record.id)
         .select()
         .then((value) {
-          ref
-              .read(yourRecordsProvider.notifier)
-              .updateRecord(RecordModel.fromJson(value[0]));
+          ref.read(yourRecordsProvider.notifier).updateRecord(
+              RecordModel.fromJson(
+                  value.firstWhere((e) => e['id'] == widget.record.id)));
+
+          if (ref
+                  .read(yourRecordsProvider.notifier)
+                  .getRecord(RecordModel.fromJson(value[0]))
+                  .dialed ==
+              0) {
+            ref.read(calendarDataProvider.notifier).removeDate(
+                'isConverted',
+                DateTime.now()
+                    .difference(DateTime.parse(widget.record.date))
+                    .inDays);
+          } else {
+            ref.read(calendarDataProvider.notifier).addDate(
+                'isConverted',
+                DateTime.now()
+                    .difference(DateTime.parse(widget.record.date))
+                    .inDays);
+          }
         })
         .onError((error, stackTrace) {
           errorSnackBar(context, "Error updating record");
@@ -54,7 +73,7 @@ class _RecordCardState extends ConsumerState<RecordCard> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
         decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(
@@ -111,9 +130,9 @@ class _RecordCardState extends ConsumerState<RecordCard> {
                     return Text(
                       "${value.toStringAsFixed(0)}%",
                       style: TextStyle(
-                        color: value < 10
+                        color: value < 20
                             ? CustomColors.red
-                            : value < 25
+                            : value < 50
                                 ? CustomColors.yellow
                                 : CustomColors.green,
                         fontWeight: FontWeight.normal,

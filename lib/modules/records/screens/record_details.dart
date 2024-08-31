@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:confetti/confetti.dart';
 
 class RecordDetails extends ConsumerStatefulWidget {
   final RecordModel? record;
@@ -23,6 +24,9 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
   final _controller = TextEditingController();
   bool _loading = true;
   final supabase = Supabase.instance.client;
+
+  ConfettiController _confettiController =
+      ConfettiController(duration: const Duration(seconds: 1));
 
   infoBottomSheet() {
     showModalBottomSheet(
@@ -190,6 +194,8 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(
+        "--------------------------------------${ref.read(recordDataController).date}");
     return Scaffold(
       appBar: _loading
           ? null
@@ -224,7 +230,19 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  //Total Dialed
+                  ConfettiWidget(
+                    confettiController: _confettiController,
+                    blastDirectionality: BlastDirectionality.explosive,
+                    emissionFrequency: 0.1,
+                    shouldLoop: false,
+                    colors: const [
+                      Colors.green,
+                      Colors.blue,
+                      Colors.pink,
+                      Colors.orange,
+                      Colors.purple
+                    ],
+                  ),
                   RecordInfoList(
                     icon: SizedBox(
                       height: 20,
@@ -320,24 +338,27 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                           ),
                         ),
                         const Spacer(),
-                        Text(
-                          "${(ref.watch(recordDataController).dialToConnect * 100).toStringAsFixed(1)}%",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color:
-                                (ref.watch(recordDataController).dialToConnect *
-                                            100) <=
-                                        10
+                        TweenAnimationBuilder<double>(
+                          duration: const Duration(milliseconds: 150),
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: ref.watch(recordDataController).dialToConnect *
+                                100,
+                          ),
+                          builder: (context, value, child) {
+                            return Text(
+                              "${value.toStringAsFixed(1)}%",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: value <= 20
                                     ? CustomColors.red
-                                    : (ref
-                                                    .read(recordDataController)
-                                                    .dialToConnect *
-                                                100) <=
-                                            25
+                                    : value <= 50
                                         ? CustomColors.yellow
                                         : CustomColors.green,
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -418,6 +439,10 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                       );
                     },
                     onIncremenet: () {
+                      if (ref.read(recordDataController).conversions <
+                          ref.read(recordDataController).meetings) {
+                        _confettiController.play();
+                      }
                       ref
                           .read(recordDataController.notifier)
                           .conversionsIncrement();
@@ -453,23 +478,29 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                           ),
                         ),
                         const Spacer(),
-                        Text(
-                          "${(ref.watch(recordDataController).connectToMeeting * 100).toStringAsFixed(1)}%",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: ref
-                                        .watch(recordDataController)
-                                        .connectToMeeting >=
-                                    0.25
-                                ? CustomColors.green
-                                : ref
-                                            .read(recordDataController)
-                                            .connectToMeeting >=
-                                        0.1
-                                    ? CustomColors.yellow
-                                    : CustomColors.red,
+                        TweenAnimationBuilder<double>(
+                          duration: const Duration(milliseconds: 150),
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: ref
+                                    .watch(recordDataController)
+                                    .connectToMeeting *
+                                100,
                           ),
+                          builder: (context, value, child) {
+                            return Text(
+                              "${value.toStringAsFixed(1)}%",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: value >= 25
+                                    ? CustomColors.green
+                                    : value >= 10
+                                        ? CustomColors.yellow
+                                        : CustomColors.red,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -488,22 +519,27 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                           ),
                         ),
                         const Spacer(),
-                        Text(
-                          "${(ref.watch(recordDataController).dialToMeeting * 100).toStringAsFixed(1)}%",
-                          style: TextStyle(
-                            color:
-                                ref.watch(recordDataController).dialToMeeting >=
-                                        0.25
+                        TweenAnimationBuilder<double>(
+                          duration: const Duration(milliseconds: 150),
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: ref.watch(recordDataController).dialToMeeting *
+                                100,
+                          ),
+                          builder: (context, value, child) {
+                            return Text(
+                              "${value.toStringAsFixed(1)}%",
+                              style: TextStyle(
+                                color: value >= 25
                                     ? CustomColors.green
-                                    : ref
-                                                .watch(recordDataController)
-                                                .dialToMeeting >=
-                                            0.10
+                                    : value >= 10
                                         ? CustomColors.yellow
                                         : CustomColors.red,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

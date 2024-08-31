@@ -130,9 +130,9 @@ class _RecordCardState extends ConsumerState<RecordCard> {
                     return Text(
                       "${value.toStringAsFixed(0)}%",
                       style: TextStyle(
-                        color: value < 10
+                        color: value < 20
                             ? CustomColors.red
-                            : value < 25
+                            : value < 50
                                 ? CustomColors.yellow
                                 : CustomColors.green,
                         fontWeight: FontWeight.normal,

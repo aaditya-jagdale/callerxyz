@@ -1,6 +1,8 @@
+import 'package:callerxyz/modules/home/screens/privacy_policy.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/snackbars.dart';
 import 'package:callerxyz/modules/shared/widgets/textfields.dart';
+import 'package:callerxyz/modules/shared/widgets/transitions.dart';
 import 'package:callerxyz/onboarding_page.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +108,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   backgroundColor: CustomColors.black10,
                   alignment: Alignment.centerLeft,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  rightSlideTransition(context, const PrivacyPolicy());
+                },
                 child: const Row(
                   children: [
                     Icon(Icons.privacy_tip_outlined),

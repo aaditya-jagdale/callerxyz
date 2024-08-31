@@ -5,13 +5,11 @@ import 'package:intl/intl.dart';
 
 class MainGraphCard extends StatelessWidget {
   final List<FlSpot> pointsList;
-  // final List<DateTime> timeFrame;
   final String title;
 
   const MainGraphCard({
     super.key,
     required this.pointsList,
-    // required this.timeFrame,
     required this.title,
   });
 
@@ -60,7 +58,9 @@ class MainGraphCard extends StatelessWidget {
                     color: CustomColors.black,
                     belowBarData: BarAreaData(
                       show: true,
-                      color: CustomColors.black.withOpacity(0.2),
+                      color: pointsList.first.y > pointsList.last.y
+                          ? CustomColors.green.withOpacity(0.2)
+                          : CustomColors.red.withOpacity(0.2),
                     ),
                     dotData: FlDotData(
                       show: true,
@@ -142,10 +142,10 @@ class MainGraphCard extends StatelessWidget {
                     getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                       return touchedBarSpots.map((barSpot) {
                         final flSpot = barSpot;
+                        final date = DateTime.now()
+                            .subtract(Duration(days: flSpot.x.toInt()));
                         return LineTooltipItem(
-                          title == "Dialed Record"
-                              ? '${flSpot.y.toStringAsFixed(0)} calls'
-                              : '${flSpot.y.toStringAsFixed(0)} %',
+                          '${title == "Dialed Record" ? '${flSpot.y.toStringAsFixed(0)} calls' : '${flSpot.y.toStringAsFixed(0)} %'}\n${DateFormat('MMM dd').format(date)}',
                           const TextStyle(
                             color: CustomColors.white,
                             fontWeight: FontWeight.bold,

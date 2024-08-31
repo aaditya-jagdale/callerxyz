@@ -1,4 +1,3 @@
-
 import 'package:callerxyz/modules/records/widget/record_info_list.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
@@ -339,24 +338,27 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                           ),
                         ),
                         const Spacer(),
-                        Text(
-                          "${(ref.watch(recordDataController).dialToConnect * 100).toStringAsFixed(1)}%",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color:
-                                (ref.watch(recordDataController).dialToConnect *
-                                            100) <=
-                                        10
+                        TweenAnimationBuilder<double>(
+                          duration: const Duration(milliseconds: 150),
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: ref.watch(recordDataController).dialToConnect *
+                                100,
+                          ),
+                          builder: (context, value, child) {
+                            return Text(
+                              "${value.toStringAsFixed(1)}%",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: value <= 20
                                     ? CustomColors.red
-                                    : (ref
-                                                    .read(recordDataController)
-                                                    .dialToConnect *
-                                                100) <=
-                                            25
+                                    : value <= 50
                                         ? CustomColors.yellow
                                         : CustomColors.green,
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -476,23 +478,29 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                           ),
                         ),
                         const Spacer(),
-                        Text(
-                          "${(ref.watch(recordDataController).connectToMeeting * 100).toStringAsFixed(1)}%",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: ref
-                                        .watch(recordDataController)
-                                        .connectToMeeting >=
-                                    0.25
-                                ? CustomColors.green
-                                : ref
-                                            .read(recordDataController)
-                                            .connectToMeeting >=
-                                        0.1
-                                    ? CustomColors.yellow
-                                    : CustomColors.red,
+                        TweenAnimationBuilder<double>(
+                          duration: const Duration(milliseconds: 150),
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: ref
+                                    .watch(recordDataController)
+                                    .connectToMeeting *
+                                100,
                           ),
+                          builder: (context, value, child) {
+                            return Text(
+                              "${value.toStringAsFixed(1)}%",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: value >= 25
+                                    ? CustomColors.green
+                                    : value >= 10
+                                        ? CustomColors.yellow
+                                        : CustomColors.red,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -511,22 +519,27 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
                           ),
                         ),
                         const Spacer(),
-                        Text(
-                          "${(ref.watch(recordDataController).dialToMeeting * 100).toStringAsFixed(1)}%",
-                          style: TextStyle(
-                            color:
-                                ref.watch(recordDataController).dialToMeeting >=
-                                        0.25
+                        TweenAnimationBuilder<double>(
+                          duration: const Duration(milliseconds: 150),
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: ref.watch(recordDataController).dialToMeeting *
+                                100,
+                          ),
+                          builder: (context, value, child) {
+                            return Text(
+                              "${value.toStringAsFixed(1)}%",
+                              style: TextStyle(
+                                color: value >= 25
                                     ? CustomColors.green
-                                    : ref
-                                                .watch(recordDataController)
-                                                .dialToMeeting >=
-                                            0.10
+                                    : value >= 10
                                         ? CustomColors.yellow
                                         : CustomColors.red,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

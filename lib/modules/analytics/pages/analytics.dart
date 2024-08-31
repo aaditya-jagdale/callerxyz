@@ -203,9 +203,9 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    afterDate =
-                        DateTime(DateTime.now().year, DateTime.now().month)
-                            .subtract(const Duration(days: 1));
+                    afterDate = DateTime(
+                            DateTime.now().year, DateTime.now().month - 1, 1)
+                        .subtract(const Duration(days: 1));
                     setState(() {
                       timeFrameIndex = 1;
                     });
@@ -255,7 +255,7 @@ class _AnalyticsState extends ConsumerState<Analytics> {
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: Text(
-                      "Last Year",
+                      "Year to date",
                       style: TextStyle(
                         color: timeFrameIndex == 2
                             ? CustomColors.white

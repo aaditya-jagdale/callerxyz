@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:callerxyz/modules/records/widget/record_info_list.dart';
 import 'package:callerxyz/modules/shared/models/record_model.dart';

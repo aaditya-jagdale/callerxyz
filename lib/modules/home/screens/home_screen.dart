@@ -1,4 +1,5 @@
 import 'package:callerxyz/modules/analytics/pages/analytics.dart';
+import 'package:callerxyz/modules/crm/screens/crm.dart';
 import 'package:callerxyz/modules/home/screens/calendar_view.dart';
 import 'package:callerxyz/modules/home/screens/profile_page.dart';
 import 'package:callerxyz/modules/home/screens/your_records.dart';
@@ -125,6 +126,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                     ),
+                  PopupMenuItem(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CRM(),
+                        ),
+                      );
+                    },
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.list),
+                        SizedBox(width: 10),
+                        Text('CRM'),
+                      ],
+                    ),
+                  ),
                   PopupMenuItem(
                     onTap: () {
                       Navigator.push(

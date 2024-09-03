@@ -45,17 +45,13 @@ class _RecordCardState extends ConsumerState<RecordCard> {
                   .getRecord(RecordModel.fromJson(value[0]))
                   .dialed ==
               0) {
-            ref.read(calendarDataProvider.notifier).removeDate(
-                'isConverted',
-                DateTime.now()
-                    .difference(DateTime.parse(widget.record.date))
-                    .inDays);
+            ref.read(calendarDataProvider.notifier).removeDate(DateTime.now()
+                .difference(DateTime.parse(widget.record.date))
+                .inDays);
           } else {
-            ref.read(calendarDataProvider.notifier).addDate(
-                'isConverted',
-                DateTime.now()
-                    .difference(DateTime.parse(widget.record.date))
-                    .inDays);
+            ref.read(calendarDataProvider.notifier).addDate(DateTime.now()
+                .difference(DateTime.parse(widget.record.date))
+                .inDays);
           }
         })
         .onError((error, stackTrace) {

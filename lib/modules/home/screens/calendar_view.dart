@@ -36,21 +36,12 @@ class _CallendarViewState extends ConsumerState<CallendarView> {
   getCalendarData() async {
     final data = await supabase
         .from('user_records')
-        .select("date, conversions")
+        .select("date")
         .eq("uid", supabase.auth.currentUser!.id)
         .neq("dialed", 0);
 
     ref.read(calendarDataProvider.notifier).setCalendarData(
           data
-              .map<int>((e) => DateTime.now()
-                  .difference(DateTime.parse(e["date"].toString()))
-                  .inDays)
-              .toList(),
-        );
-
-    ref.read(calendarDataProvider.notifier).setCalendarData(
-          data
-              .where((e) => e["conversions"] != 0)
               .map<int>((e) => DateTime.now()
                   .difference(DateTime.parse(e["date"].toString()))
                   .inDays)

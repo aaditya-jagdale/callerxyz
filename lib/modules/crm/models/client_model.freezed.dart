@@ -20,10 +20,12 @@ ClientModel _$ClientModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ClientModel {
+  int get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get position => throw _privateConstructorUsedError;
   String get company => throw _privateConstructorUsedError;
   String get notes => throw _privateConstructorUsedError;
+  String get phone_number => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
   String get reminder => throw _privateConstructorUsedError;
   String get recording => throw _privateConstructorUsedError;
@@ -42,10 +44,12 @@ abstract class $ClientModelCopyWith<$Res> {
       _$ClientModelCopyWithImpl<$Res, ClientModel>;
   @useResult
   $Res call(
-      {String name,
+      {int id,
+      String name,
       String position,
       String company,
       String notes,
+      String phone_number,
       String status,
       String reminder,
       String recording,
@@ -65,16 +69,22 @@ class _$ClientModelCopyWithImpl<$Res, $Val extends ClientModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? name = null,
     Object? position = null,
     Object? company = null,
     Object? notes = null,
+    Object? phone_number = null,
     Object? status = null,
     Object? reminder = null,
     Object? recording = null,
     Object? document = null,
   }) {
     return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -90,6 +100,10 @@ class _$ClientModelCopyWithImpl<$Res, $Val extends ClientModel>
       notes: null == notes
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
+              as String,
+      phone_number: null == phone_number
+          ? _value.phone_number
+          : phone_number // ignore: cast_nullable_to_non_nullable
               as String,
       status: null == status
           ? _value.status
@@ -120,10 +134,12 @@ abstract class _$$ClientModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String name,
+      {int id,
+      String name,
       String position,
       String company,
       String notes,
+      String phone_number,
       String status,
       String reminder,
       String recording,
@@ -141,16 +157,22 @@ class __$$ClientModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? name = null,
     Object? position = null,
     Object? company = null,
     Object? notes = null,
+    Object? phone_number = null,
     Object? status = null,
     Object? reminder = null,
     Object? recording = null,
     Object? document = null,
   }) {
     return _then(_$ClientModelImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -166,6 +188,10 @@ class __$$ClientModelImplCopyWithImpl<$Res>
       notes: null == notes
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
+              as String,
+      phone_number: null == phone_number
+          ? _value.phone_number
+          : phone_number // ignore: cast_nullable_to_non_nullable
               as String,
       status: null == status
           ? _value.status
@@ -191,10 +217,12 @@ class __$$ClientModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ClientModelImpl implements _ClientModel {
   const _$ClientModelImpl(
-      {this.name = "",
+      {required this.id,
+      required this.name,
       this.position = "",
       this.company = "",
       this.notes = "",
+      this.phone_number = "",
       this.status = "",
       this.reminder = "",
       this.recording = "",
@@ -204,7 +232,8 @@ class _$ClientModelImpl implements _ClientModel {
       _$$ClientModelImplFromJson(json);
 
   @override
-  @JsonKey()
+  final int id;
+  @override
   final String name;
   @override
   @JsonKey()
@@ -215,6 +244,9 @@ class _$ClientModelImpl implements _ClientModel {
   @override
   @JsonKey()
   final String notes;
+  @override
+  @JsonKey()
+  final String phone_number;
   @override
   @JsonKey()
   final String status;
@@ -230,7 +262,7 @@ class _$ClientModelImpl implements _ClientModel {
 
   @override
   String toString() {
-    return 'ClientModel(name: $name, position: $position, company: $company, notes: $notes, status: $status, reminder: $reminder, recording: $recording, document: $document)';
+    return 'ClientModel(id: $id, name: $name, position: $position, company: $company, notes: $notes, phone_number: $phone_number, status: $status, reminder: $reminder, recording: $recording, document: $document)';
   }
 
   @override
@@ -238,11 +270,14 @@ class _$ClientModelImpl implements _ClientModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ClientModelImpl &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.position, position) ||
                 other.position == position) &&
             (identical(other.company, company) || other.company == company) &&
             (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.phone_number, phone_number) ||
+                other.phone_number == phone_number) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.reminder, reminder) ||
                 other.reminder == reminder) &&
@@ -254,8 +289,8 @@ class _$ClientModelImpl implements _ClientModel {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, name, position, company, notes,
-      status, reminder, recording, document);
+  int get hashCode => Object.hash(runtimeType, id, name, position, company,
+      notes, phone_number, status, reminder, recording, document);
 
   @JsonKey(ignore: true)
   @override
@@ -273,10 +308,12 @@ class _$ClientModelImpl implements _ClientModel {
 
 abstract class _ClientModel implements ClientModel {
   const factory _ClientModel(
-      {final String name,
+      {required final int id,
+      required final String name,
       final String position,
       final String company,
       final String notes,
+      final String phone_number,
       final String status,
       final String reminder,
       final String recording,
@@ -286,6 +323,8 @@ abstract class _ClientModel implements ClientModel {
       _$ClientModelImpl.fromJson;
 
   @override
+  int get id;
+  @override
   String get name;
   @override
   String get position;
@@ -293,6 +332,8 @@ abstract class _ClientModel implements ClientModel {
   String get company;
   @override
   String get notes;
+  @override
+  String get phone_number;
   @override
   String get status;
   @override

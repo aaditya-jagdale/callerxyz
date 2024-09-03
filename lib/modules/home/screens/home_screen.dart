@@ -77,6 +77,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title: RichText(
           text: const TextSpan(
             style: TextStyle(fontSize: 24, color: Colors.black),

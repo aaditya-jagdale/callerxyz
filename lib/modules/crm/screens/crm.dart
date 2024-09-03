@@ -1,6 +1,8 @@
 import 'package:callerxyz/modules/crm/models/client_model.dart';
 import 'package:callerxyz/modules/crm/widgets/crm_list_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CRM extends StatefulWidget {
   const CRM({super.key});
@@ -10,23 +12,28 @@ class CRM extends StatefulWidget {
 }
 
 class _CRMState extends State<CRM> {
-  List<ClientModel> clients = [
-    ClientModel(
-      name: 'Mark Zuck',
-      position: 'Founder',
-      company: 'Facebook',
-    ),
-    ClientModel(
-      name: 'Jeff Loki',
-      position: 'Designer',
-      company: 'Design agency',
-    ),
-    ClientModel(
-      name: 'Lewis Lamb',
-      position: 'Sales manager',
-      company: 'AZ marketing',
-    ),
-  ];
+  final supabase = Supabase.instance.client;
+  bool _isLoading = true;
+  List<ClientModel> clients = [];
+
+  getCrmData() async {
+    await supabase
+        .from('crm')
+        .select('*')
+        .eq('uid', supabase.auth.currentUser!.id)
+        .then((response) {
+      setState(() {
+        clients = response.map((e) => ClientModel.fromJson(e)).toList();
+        _isLoading = false;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    getCrmData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,16 +54,37 @@ class _CRMState extends State<CRM> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              children:
-                  clients.map((client) => CrmListTile(client: client)).toList(),
+      body: _isLoading
+          ? ListView.builder(
+              itemCount: 10,
+              itemBuilder: (context, index) => Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: clients.length,
+                    itemBuilder: (context, index) {
+                      return CrmListTile(client: clients[index]);
+                    },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

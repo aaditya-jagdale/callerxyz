@@ -1,5 +1,5 @@
 import 'package:callerxyz/modules/crm/models/client_model.dart';
-import 'package:callerxyz/modules/crm/widgets/client_details.dart';
+import 'package:callerxyz/modules/crm/screens/client_details.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/modules/shared/widgets/transitions.dart';
 import 'package:flutter/material.dart';

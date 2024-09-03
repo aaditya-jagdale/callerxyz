@@ -41,7 +41,6 @@ class _CallendarViewState extends ConsumerState<CallendarView> {
         .neq("dialed", 0);
 
     ref.read(calendarDataProvider.notifier).setCalendarData(
-          'isSuccessful',
           data
               .map<int>((e) => DateTime.now()
                   .difference(DateTime.parse(e["date"].toString()))
@@ -50,7 +49,6 @@ class _CallendarViewState extends ConsumerState<CallendarView> {
         );
 
     ref.read(calendarDataProvider.notifier).setCalendarData(
-          'isConverted',
           data
               .where((e) => e["conversions"] != 0)
               .map<int>((e) => DateTime.now()
@@ -125,12 +123,8 @@ class _CallendarViewState extends ConsumerState<CallendarView> {
               itemCount: 365,
               itemBuilder: (context, index) {
                 int today = DateTime.now().weekday - 7;
-                bool isSuccessful = ref
-                    .watch(calendarDataProvider)['isSuccessful']!
-                    .contains(index + today);
-                bool isConverted = ref
-                    .watch(calendarDataProvider)['isConverted']!
-                    .contains(index + today);
+                bool isSuccessful =
+                    ref.watch(calendarDataProvider).contains(index + today);
 
                 if (mounted) {
                   return AnimatedContainer(
@@ -138,11 +132,9 @@ class _CallendarViewState extends ConsumerState<CallendarView> {
                     height: 10,
                     width: 10,
                     decoration: BoxDecoration(
-                      color: isConverted
-                          ? CustomColors.green
-                          : isSuccessful
-                              ? CustomColors.black25
-                              : CustomColors.black25.withOpacity(0.25),
+                      color: isSuccessful
+                          ? CustomColors.black25
+                          : CustomColors.black25.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   );

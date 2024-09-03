@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:callerxyz/modules/home/screens/all_records.dart';
 import 'package:callerxyz/modules/home/widgets/record_card.dart';
 import 'package:callerxyz/modules/home/widgets/today_tile.dart';
@@ -114,20 +113,25 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
                       .eq('uid', supabase.auth.currentUser!.id)
                       .eq('id', ref.watch(yourRecordsProvider).records[0].id)
                       .select()
-                      .then((record) {
-                        if (record.isNotEmpty) {
-                          ref
-                              .watch(yourRecordsProvider.notifier)
-                              .updateRecord(RecordModel.fromJson(record[0]));
-                          if (record[0]['dialed'] == 0) {
-                            ref
-                                .watch(calendarDataProvider.notifier)
-                                .removeDate('isConverted', 0);
-                          } else {
-                            ref
-                                .watch(calendarDataProvider.notifier)
-                                .addDate('isConverted', 0);
-                          }
+                      .then((value) {
+                        ref.read(yourRecordsProvider.notifier).updateRecord(
+                            RecordModel.fromJson(value
+                                .firstWhere((e) => e['id'] == value[0]['id'])));
+
+                        if (ref
+                                .read(yourRecordsProvider.notifier)
+                                .getRecord(RecordModel.fromJson(value[0]))
+                                .dialed ==
+                            0) {
+                          ref.read(calendarDataProvider.notifier).removeDate(
+                              DateTime.now()
+                                  .difference(DateTime.parse(value[0]['date']))
+                                  .inDays);
+                        } else {
+                          ref.read(calendarDataProvider.notifier).addDate(
+                              DateTime.now()
+                                  .difference(DateTime.parse(value[0]['date']))
+                                  .inDays);
                         }
                       })
                       .catchError((error, stackTrace) {

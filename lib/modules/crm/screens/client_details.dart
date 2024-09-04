@@ -14,7 +14,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ClientDetails extends ConsumerStatefulWidget {
   final ClientModel client;
-  const ClientDetails({super.key, required this.client});
+  final bool isNewClient;
+  const ClientDetails({
+    super.key,
+    required this.client,
+    this.isNewClient = false,
+  });
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _ClientDetailsState();
@@ -56,7 +61,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
     );
   }
 
-  customTextbottomSheet({Function()? onTap}) {
+  customTextbottomSheet({Function()? onTap, required bool? isPhone}) {
     showModalBottomSheet(
       context: context,
       isDismissible: true,
@@ -76,7 +81,8 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                 CustomTextField(
                   controller: bottomSheetTextController,
                   title: "Enter Updated Value",
-                  keyboardType: TextInputType.number,
+                  keyboardType:
+                      isPhone! ? TextInputType.phone : TextInputType.text,
                 ),
                 const SizedBox(height: 10),
                 CustomPrimaryButton(
@@ -263,6 +269,45 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
     }
   }
 
+  addNewClient() async {
+    //upload data to supabase
+    loadingPopup();
+    if (nameController.text.trim().isEmpty) {
+      setState(() {
+        nameError = "Name is required";
+      });
+      Navigator.of(context).pop();
+    } else {
+      setState(() {
+        nameError = null;
+      });
+      supabase
+          .from('crm')
+          .insert({
+            'name': nameController.text.trim(),
+            'notes': notesController.text.trim(),
+            'position': selectedPosition,
+            'company': selectedCompany,
+            'status': statuses.indexOf(selectedStatus),
+            'reminder': selectedReminder != null
+                ? DateFormat("yyyy-MM-dd HH:mm:ssZ").format(selectedReminder!)
+                : null,
+            'phone_number': selectedNumber,
+          })
+          .select()
+          .then((value) {
+            ref
+                .read(clientsProvider.notifier)
+                .addClient(ClientModel.fromJson(value[0]));
+
+            if (mounted) {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            }
+          });
+    }
+  }
+
   @override
   void initState() {
     nameController.text = widget.client.name;
@@ -293,7 +338,11 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
         if (didPop) {
           return;
         }
-        await uploadData();
+        if (widget.isNewClient) {
+          await addNewClient();
+        } else {
+          await uploadData();
+        }
       },
       child: Scaffold(
         backgroundColor: CustomColors.white,
@@ -351,6 +400,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                       placeholder: "Position",
                       title: selectedPosition,
                       onTap: () => customTextbottomSheet(
+                        isPhone: false,
                         onTap: () {
                           setState(() {
                             selectedPosition = bottomSheetTextController.text;
@@ -360,6 +410,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                         },
                       ),
                       onLongPress: () => customTextbottomSheet(
+                        isPhone: false,
                         onTap: () {
                           setState(() {
                             selectedPosition = bottomSheetTextController.text;
@@ -375,6 +426,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                       title: selectedCompany,
                       onTap: () {
                         customTextbottomSheet(
+                          isPhone: false,
                           onTap: () {
                             setState(() {
                               selectedCompany = bottomSheetTextController.text;
@@ -385,6 +437,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                         );
                       },
                       onLongPress: () => customTextbottomSheet(
+                        isPhone: false,
                         onTap: () {
                           setState(() {
                             selectedCompany = bottomSheetTextController.text;
@@ -419,6 +472,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                       onTap: () {
                         if (selectedNumber.isEmpty) {
                           customTextbottomSheet(
+                            isPhone: true,
                             onTap: () {
                               setState(() {
                                 selectedNumber = bottomSheetTextController.text;
@@ -434,6 +488,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                         }
                       },
                       onLongPress: () => customTextbottomSheet(
+                        isPhone: true,
                         onTap: () {
                           setState(() {
                             selectedNumber = bottomSheetTextController.text;

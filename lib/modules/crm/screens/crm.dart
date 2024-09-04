@@ -1,9 +1,12 @@
 import 'package:callerxyz/crm_riverpod.dart';
 import 'package:callerxyz/modules/crm/models/client_model.dart';
+import 'package:callerxyz/modules/crm/screens/client_details.dart';
 import 'package:callerxyz/modules/crm/widgets/crm_list_tile.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
+import 'package:callerxyz/modules/shared/widgets/transitions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -52,7 +55,18 @@ class _CRMState extends ConsumerState<CRM> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(100),
         ),
-        onPressed: () {},
+        onPressed: () {
+          rightSlideTransition(
+            context,
+            const ClientDetails(
+              isNewClient: true,
+              client: ClientModel(
+                id: -1,
+                name: "",
+              ),
+            ),
+          );
+        },
         child: Icon(
           Icons.add,
           color: CustomColors.white,
@@ -79,7 +93,9 @@ class _CRMState extends ConsumerState<CRM> {
                 _isSorting = !_isSorting;
               });
             },
-            icon: Icon(Icons.filter_list),
+            icon: _isSorting
+                ? SvgPicture.asset("assets/filter_alphabetical.svg")
+                : SvgPicture.asset("assets/filter.svg"),
           ),
         ],
       ),
@@ -102,19 +118,16 @@ class _CRMState extends ConsumerState<CRM> {
                 ),
               ),
             )
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: ref.watch(clientsProvider).length,
-                    itemBuilder: (context, index) {
-                      return CrmListTile(
-                        client: ref.watch(clientsProvider)[index],
-                      );
-                    },
-                  ),
-                ),
-              ],
+          : RefreshIndicator(
+              onRefresh: () => getCrmData(),
+              child: ListView.builder(
+                itemCount: ref.watch(clientsProvider).length,
+                itemBuilder: (context, index) {
+                  return CrmListTile(
+                    client: ref.watch(clientsProvider)[index],
+                  );
+                },
+              ),
             ),
     );
   }

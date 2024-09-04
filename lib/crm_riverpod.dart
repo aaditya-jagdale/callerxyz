@@ -10,7 +10,7 @@ class ClientsNotifier extends StateNotifier<List<ClientModel>> {
   ClientsNotifier() : super(<ClientModel>[]);
 
   void addClient(ClientModel client) {
-    state = [...state, client];
+    state = [client, ...state];
   }
 
   void sortByName() {

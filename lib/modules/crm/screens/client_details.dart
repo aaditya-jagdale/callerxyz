@@ -369,32 +369,6 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                       ),
                     ),
                     SizedBox(height: 10),
-                    Text(
-                      "Notes",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                    ),
-                    TextField(
-                      controller: notesController,
-                      maxLines: 5,
-                      minLines: 1,
-                      style: TextStyle(fontSize: 16),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Add notes",
-                        hintStyle: TextStyle(color: CustomColors.black25),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 6),
-                      child: DottedLine(
-                        dashColor: CustomColors.black50,
-                        dashGapLength: 6,
-                        dashLength: 6,
-                        lineThickness: 1,
-                        dashRadius: 0,
-                      ),
-                    ),
                     ClientDetailsListTile(
                       icon: SvgPicture.asset("assets/person.svg"),
                       placeholder: "Position",
@@ -506,6 +480,32 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                       icon: SvgPicture.asset("assets/attachment.svg"),
                       placeholder: "Add a document",
                     ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 6),
+                      child: DottedLine(
+                        dashColor: CustomColors.black50,
+                        dashGapLength: 6,
+                        dashLength: 6,
+                        lineThickness: 1,
+                        dashRadius: 0,
+                      ),
+                    ),
+                    Text(
+                      "Notes",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
+                    TextField(
+                      controller: notesController,
+                      maxLines: null,
+                      minLines: 1,
+                      style: TextStyle(fontSize: 16),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: "Add notes",
+                        hintStyle: TextStyle(color: CustomColors.black25),
+                      ),
+                    ),
                     const Expanded(child: SizedBox(height: 50)),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -515,7 +515,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                           style: TextStyle(color: CustomColors.black50),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),

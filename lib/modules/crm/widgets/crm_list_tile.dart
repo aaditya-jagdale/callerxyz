@@ -6,11 +6,9 @@ import 'package:flutter/material.dart';
 
 class CrmListTile extends StatelessWidget {
   final ClientModel client;
-  final Function()? onReturn;
   const CrmListTile({
     super.key,
     required this.client,
-    this.onReturn,
   });
 
   @override
@@ -20,7 +18,6 @@ class CrmListTile extends StatelessWidget {
         rightSlideTransition(
           context,
           ClientDetails(client: client),
-          onComplete: onReturn,
         );
       },
       child: Container(

@@ -1,22 +1,23 @@
+import 'package:callerxyz/crm_riverpod.dart';
 import 'package:callerxyz/modules/crm/models/client_model.dart';
 import 'package:callerxyz/modules/crm/widgets/crm_list_tile.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class CRM extends StatefulWidget {
+class CRM extends ConsumerStatefulWidget {
   const CRM({super.key});
 
   @override
-  State<CRM> createState() => _CRMState();
+  ConsumerState<CRM> createState() => _CRMState();
 }
 
-class _CRMState extends State<CRM> {
+class _CRMState extends ConsumerState<CRM> {
   final supabase = Supabase.instance.client;
   bool _isLoading = true;
   bool _isSorting = false;
-  List<ClientModel> clients = [];
 
   getCrmData() async {
     setState(() {
@@ -28,8 +29,10 @@ class _CRMState extends State<CRM> {
         .eq('uid', supabase.auth.currentUser!.id)
         .order('createdAt', ascending: false)
         .then((response) {
+      ref
+          .read(clientsProvider.notifier)
+          .setClients(response.map((e) => ClientModel.fromJson(e)).toList());
       setState(() {
-        clients = response.map((e) => ClientModel.fromJson(e)).toList();
         _isLoading = false;
       });
     });
@@ -69,9 +72,9 @@ class _CRMState extends State<CRM> {
             onPressed: () {
               setState(() {
                 if (_isSorting) {
-                  clients.sort((a, b) => a.name.compareTo(b.name));
+                  ref.read(clientsProvider.notifier).sortByName();
                 } else {
-                  clients.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                  ref.read(clientsProvider.notifier).sortByCreatedAt();
                 }
                 _isSorting = !_isSorting;
               });
@@ -103,11 +106,10 @@ class _CRMState extends State<CRM> {
               children: [
                 Expanded(
                   child: ListView.builder(
-                    itemCount: clients.length,
+                    itemCount: ref.watch(clientsProvider).length,
                     itemBuilder: (context, index) {
                       return CrmListTile(
-                        client: clients[index],
-                        onReturn: () => getCrmData(),
+                        client: ref.watch(clientsProvider)[index],
                       );
                     },
                   ),

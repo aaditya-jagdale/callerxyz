@@ -1,3 +1,4 @@
+import 'package:callerxyz/crm_riverpod.dart';
 import 'package:callerxyz/modules/crm/models/client_model.dart';
 import 'package:callerxyz/modules/crm/widgets/client_details_list_tile.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
@@ -6,19 +7,20 @@ import 'package:callerxyz/modules/shared/widgets/textfields.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ClientDetails extends StatefulWidget {
+class ClientDetails extends ConsumerStatefulWidget {
   final ClientModel client;
   const ClientDetails({super.key, required this.client});
 
   @override
-  State<ClientDetails> createState() => _ClientDetailsState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _ClientDetailsState();
 }
 
-class _ClientDetailsState extends State<ClientDetails> {
+class _ClientDetailsState extends ConsumerState<ClientDetails> {
   final nameController = TextEditingController();
   final bottomSheetTextController = TextEditingController();
   final supabase = Supabase.instance.client;
@@ -249,7 +251,10 @@ class _ClientDetailsState extends State<ClientDetails> {
           .eq('id', widget.client.id)
           .select()
           .then((value) {
-            debugPrint("----------------Updated: $value");
+            ref
+                .read(clientsProvider.notifier)
+                .updateClient(ClientModel.fromJson(value[0]));
+
             if (mounted) {
               Navigator.of(context).pop();
               Navigator.of(context).pop();

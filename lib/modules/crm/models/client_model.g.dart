@@ -14,10 +14,11 @@ _$ClientModelImpl _$$ClientModelImplFromJson(Map<String, dynamic> json) =>
       company: json['company'] as String? ?? "",
       notes: json['notes'] as String? ?? "",
       phone_number: json['phone_number'] as String? ?? "",
-      status: json['status'] as String? ?? "",
+      status: (json['status'] as num?)?.toInt() ?? 0,
       reminder: json['reminder'] as String? ?? "",
       recording: json['recording'] as String? ?? "",
       document: json['document'] as String? ?? "",
+      createdAt: json['createdAt'] as String? ?? "",
     );
 
 Map<String, dynamic> _$$ClientModelImplToJson(_$ClientModelImpl instance) =>
@@ -32,4 +33,5 @@ Map<String, dynamic> _$$ClientModelImplToJson(_$ClientModelImpl instance) =>
       'reminder': instance.reminder,
       'recording': instance.recording,
       'document': instance.document,
+      'createdAt': instance.createdAt,
     };

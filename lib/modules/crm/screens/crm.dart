@@ -1,5 +1,6 @@
 import 'package:callerxyz/modules/crm/models/client_model.dart';
 import 'package:callerxyz/modules/crm/widgets/crm_list_tile.dart';
+import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,13 +15,18 @@ class CRM extends StatefulWidget {
 class _CRMState extends State<CRM> {
   final supabase = Supabase.instance.client;
   bool _isLoading = true;
+  bool _isSorting = false;
   List<ClientModel> clients = [];
 
   getCrmData() async {
+    setState(() {
+      _isLoading = true;
+    });
     await supabase
         .from('crm')
         .select('*')
         .eq('uid', supabase.auth.currentUser!.id)
+        .order('createdAt', ascending: false)
         .then((response) {
       setState(() {
         clients = response.map((e) => ClientModel.fromJson(e)).toList();
@@ -38,6 +44,17 @@ class _CRMState extends State<CRM> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: CustomColors.black,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(100),
+        ),
+        onPressed: () {},
+        child: Icon(
+          Icons.add,
+          color: CustomColors.white,
+        ),
+      ),
       appBar: AppBar(
         automaticallyImplyLeading: true,
         titleSpacing: 0,
@@ -49,7 +66,16 @@ class _CRMState extends State<CRM> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              setState(() {
+                if (_isSorting) {
+                  clients.sort((a, b) => a.name.compareTo(b.name));
+                } else {
+                  clients.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                }
+                _isSorting = !_isSorting;
+              });
+            },
             icon: Icon(Icons.filter_list),
           ),
         ],
@@ -79,7 +105,10 @@ class _CRMState extends State<CRM> {
                   child: ListView.builder(
                     itemCount: clients.length,
                     itemBuilder: (context, index) {
-                      return CrmListTile(client: clients[index]);
+                      return CrmListTile(
+                        client: clients[index],
+                        onReturn: () => getCrmData(),
+                      );
                     },
                   ),
                 ),

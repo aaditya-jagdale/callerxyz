@@ -6,16 +6,22 @@ import 'package:flutter/material.dart';
 
 class CrmListTile extends StatelessWidget {
   final ClientModel client;
+  final Function()? onReturn;
   const CrmListTile({
     super.key,
     required this.client,
+    this.onReturn,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        rightSlideTransition(context, ClientDetails(client: client));
+        rightSlideTransition(
+          context,
+          ClientDetails(client: client),
+          onComplete: onReturn,
+        );
       },
       child: Container(
         padding: const EdgeInsets.all(16),

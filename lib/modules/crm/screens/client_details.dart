@@ -23,12 +23,36 @@ class _ClientDetailsState extends State<ClientDetails> {
   final bottomSheetTextController = TextEditingController();
   final supabase = Supabase.instance.client;
   final notesController = TextEditingController();
-
+  String? nameError;
   String selectedPosition = "";
   String selectedCompany = "";
   String selectedStatus = "";
   String selectedNumber = "";
   DateTime? selectedReminder;
+
+  List<String> statuses = [
+    "Converted",
+    "Meeting",
+    "Connected",
+    "No status",
+    "Rejected"
+  ];
+
+  loadingPopup() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: SizedBox(
+          height: 20,
+          width: 20,
+          child: CircularProgressIndicator(
+            color: CustomColors.white,
+          ),
+        ),
+      ),
+    );
+  }
 
   customTextbottomSheet({Function()? onTap}) {
     showModalBottomSheet(
@@ -199,26 +223,52 @@ class _ClientDetailsState extends State<ClientDetails> {
 
   uploadData() async {
     //upload data to supabase
-    supabase.from('clients_data').upsert({
-      'name': nameController.text,
-      'notes': notesController.text.trim(),
-      'phone_number': bottomSheetTextController.text,
-      'status': selectedStatus,
-      'reminder': DateFormat("yyyy-MM-dd").format(selectedReminder!),
-    });
+    loadingPopup();
+    if (nameController.text.trim().isEmpty) {
+      setState(() {
+        nameError = "Name is required";
+      });
+      Navigator.of(context).pop();
+    } else {
+      setState(() {
+        nameError = null;
+      });
+      supabase
+          .from('crm')
+          .update({
+            'name': nameController.text.trim(),
+            'notes': notesController.text.trim(),
+            'position': selectedPosition,
+            'company': selectedCompany,
+            'status': statuses.indexOf(selectedStatus),
+            'reminder': selectedReminder != null
+                ? DateFormat("yyyy-MM-dd HH:mm:ssZ").format(selectedReminder!)
+                : null,
+            'phone_number': selectedNumber,
+          })
+          .eq('id', widget.client.id)
+          .select()
+          .then((value) {
+            debugPrint("----------------Updated: $value");
+            if (mounted) {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            }
+          });
+    }
   }
 
   @override
   void initState() {
     nameController.text = widget.client.name;
+    notesController.text = widget.client.notes;
     selectedPosition = widget.client.position;
     selectedCompany = widget.client.company;
-    selectedNumber = widget.client.phone_number;
-    notesController.text = widget.client.notes;
-    selectedStatus = widget.client.status;
+    selectedStatus = statuses[widget.client.status];
     selectedReminder = widget.client.reminder.isNotEmpty
         ? DateTime.parse(widget.client.reminder)
         : null;
+    selectedNumber = widget.client.phone_number;
     super.initState();
   }
 
@@ -226,158 +276,191 @@ class _ClientDetailsState extends State<ClientDetails> {
   void dispose() {
     nameController.dispose();
     bottomSheetTextController.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: CustomColors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) {
+          return;
+        }
+        await uploadData();
+      },
+      child: Scaffold(
         backgroundColor: CustomColors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: CustomScrollView(
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    maxLines: 1,
-                    style: TextStyle(fontSize: 40, height: 1),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    "Notes",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                  ),
-                  TextField(
-                    controller: notesController,
-                    maxLines: 5,
-                    minLines: 1,
-                    style: TextStyle(fontSize: 16),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Add notes",
-                      hintStyle: TextStyle(color: CustomColors.black25),
+        appBar: AppBar(
+          automaticallyImplyLeading: true,
+          backgroundColor: CustomColors.white,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: nameController,
+                      maxLines: 1,
+                      style: TextStyle(fontSize: 40, height: 1),
+                      decoration: InputDecoration(
+                        errorText: nameError,
+                      ),
                     ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 6),
-                    child: DottedLine(
-                      dashColor: CustomColors.black50,
-                      dashGapLength: 6,
-                      dashLength: 6,
-                      lineThickness: 1,
-                      dashRadius: 0,
+                    SizedBox(height: 10),
+                    Text(
+                      "Notes",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                     ),
-                  ),
-                  ClientDetailsListTile(
-                    icon: SvgPicture.asset("assets/person.svg"),
-                    placeholder: "Position",
-                    title: selectedPosition,
-                    onTap: () {},
-                    onLongPress: () => customTextbottomSheet(
+                    TextField(
+                      controller: notesController,
+                      maxLines: 5,
+                      minLines: 1,
+                      style: TextStyle(fontSize: 16),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: "Add notes",
+                        hintStyle: TextStyle(color: CustomColors.black25),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 6),
+                      child: DottedLine(
+                        dashColor: CustomColors.black50,
+                        dashGapLength: 6,
+                        dashLength: 6,
+                        lineThickness: 1,
+                        dashRadius: 0,
+                      ),
+                    ),
+                    ClientDetailsListTile(
+                      icon: SvgPicture.asset("assets/person.svg"),
+                      placeholder: "Position",
+                      title: selectedPosition,
+                      onTap: () => customTextbottomSheet(
+                        onTap: () {
+                          setState(() {
+                            selectedPosition = bottomSheetTextController.text;
+                          });
+                          bottomSheetTextController.clear();
+                          Navigator.pop(context);
+                        },
+                      ),
+                      onLongPress: () => customTextbottomSheet(
+                        onTap: () {
+                          setState(() {
+                            selectedPosition = bottomSheetTextController.text;
+                          });
+                          bottomSheetTextController.clear();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                    ClientDetailsListTile(
+                      icon: SvgPicture.asset("assets/building.svg"),
+                      placeholder: "Company",
+                      title: selectedCompany,
                       onTap: () {
-                        setState(() {
-                          selectedPosition = bottomSheetTextController.text;
-                        });
-                        bottomSheetTextController.clear();
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
-                  ClientDetailsListTile(
-                    icon: SvgPicture.asset("assets/building.svg"),
-                    placeholder: "Company",
-                    title: selectedCompany,
-                    onTap: () {},
-                    onLongPress: () => customTextbottomSheet(
-                      onTap: () {
-                        setState(() {
-                          selectedCompany = bottomSheetTextController.text;
-                        });
-                        bottomSheetTextController.clear();
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
-                  ClientDetailsListTile(
-                    icon: SvgPicture.asset("assets/pentagon.svg"),
-                    placeholder: "Status",
-                    title: selectedStatus,
-                    onTap: () => _showStatusBottomSheet(context),
-                    onLongPress: () => _showStatusBottomSheet(context),
-                  ),
-                  ClientDetailsListTile(
-                    icon: SvgPicture.asset("assets/calendar.svg"),
-                    placeholder: "Add Reminder",
-                    title: selectedReminder != null
-                        ? DateFormat("MMM dd, yyyy - hh:mm a")
-                            .format(selectedReminder!)
-                        : "",
-                    onTap: () => selectDateTime(),
-                    onLongPress: () => selectDateTime(),
-                  ),
-                  ClientDetailsListTile(
-                    icon: SvgPicture.asset("assets/phone.svg"),
-                    placeholder: "Phone number",
-                    title: selectedNumber,
-                    subtitle: "Tap to copy",
-                    onTap: () {
-                      if (selectedNumber.isEmpty) {
                         customTextbottomSheet(
                           onTap: () {
                             setState(() {
-                              selectedNumber = bottomSheetTextController.text;
+                              selectedCompany = bottomSheetTextController.text;
                             });
                             bottomSheetTextController.clear();
                             Navigator.pop(context);
                           },
                         );
-                      } else {
-                        //copy to clipboard
-                        Clipboard.setData(ClipboardData(text: selectedNumber));
-                      }
-                    },
-                    onLongPress: () => customTextbottomSheet(
-                      onTap: () {
-                        setState(() {
-                          selectedNumber = bottomSheetTextController.text;
-                        });
-                        bottomSheetTextController.clear();
-                        Navigator.pop(context);
                       },
-                    ),
-                  ),
-                  ClientDetailsListTile(
-                    icon: SvgPicture.asset("assets/recording.svg"),
-                    placeholder: "Add call recording",
-                  ),
-                  ClientDetailsListTile(
-                    icon: SvgPicture.asset("assets/attachment.svg"),
-                    placeholder: "Add a document",
-                  ),
-                  const Expanded(child: SizedBox(height: 50)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Center(
-                      child: Text(
-                        "Long press to edit",
-                        style: TextStyle(color: CustomColors.black50),
+                      onLongPress: () => customTextbottomSheet(
+                        onTap: () {
+                          setState(() {
+                            selectedCompany = bottomSheetTextController.text;
+                          });
+                          bottomSheetTextController.clear();
+                          Navigator.pop(context);
+                        },
                       ),
                     ),
-                  )
-                ],
+                    ClientDetailsListTile(
+                      icon: SvgPicture.asset("assets/pentagon.svg"),
+                      placeholder: "Status",
+                      title: selectedStatus,
+                      onTap: () => _showStatusBottomSheet(context),
+                      onLongPress: () => _showStatusBottomSheet(context),
+                    ),
+                    ClientDetailsListTile(
+                      icon: SvgPicture.asset("assets/calendar.svg"),
+                      placeholder: "Add Reminder",
+                      title: selectedReminder != null
+                          ? DateFormat("MMM dd, yyyy - hh:mm a")
+                              .format(selectedReminder!)
+                          : "",
+                      onTap: () => selectDateTime(),
+                      onLongPress: () => selectDateTime(),
+                    ),
+                    ClientDetailsListTile(
+                      icon: SvgPicture.asset("assets/phone.svg"),
+                      placeholder: "Phone number",
+                      title: selectedNumber,
+                      subtitle: "Tap to copy",
+                      onTap: () {
+                        if (selectedNumber.isEmpty) {
+                          customTextbottomSheet(
+                            onTap: () {
+                              setState(() {
+                                selectedNumber = bottomSheetTextController.text;
+                              });
+                              bottomSheetTextController.clear();
+                              Navigator.pop(context);
+                            },
+                          );
+                        } else {
+                          //copy to clipboard
+                          Clipboard.setData(
+                              ClipboardData(text: selectedNumber));
+                        }
+                      },
+                      onLongPress: () => customTextbottomSheet(
+                        onTap: () {
+                          setState(() {
+                            selectedNumber = bottomSheetTextController.text;
+                          });
+                          bottomSheetTextController.clear();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                    ClientDetailsListTile(
+                      icon: SvgPicture.asset("assets/recording.svg"),
+                      placeholder: "Add call recording",
+                    ),
+                    ClientDetailsListTile(
+                      icon: SvgPicture.asset("assets/attachment.svg"),
+                      placeholder: "Add a document",
+                    ),
+                    const Expanded(child: SizedBox(height: 50)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Center(
+                        child: Text(
+                          "Long press to edit",
+                          style: TextStyle(color: CustomColors.black50),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

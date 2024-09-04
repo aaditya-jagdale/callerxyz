@@ -57,7 +57,7 @@ class ClientDetailsListTile extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         height: 1,
-                        color: CustomColors.black50,
+                        color: CustomColors.black25,
                         fontSize: 12,
                       ),
                     ),

@@ -26,10 +26,11 @@ mixin _$ClientModel {
   String get company => throw _privateConstructorUsedError;
   String get notes => throw _privateConstructorUsedError;
   String get phone_number => throw _privateConstructorUsedError;
-  String get status => throw _privateConstructorUsedError;
+  int get status => throw _privateConstructorUsedError;
   String get reminder => throw _privateConstructorUsedError;
   String get recording => throw _privateConstructorUsedError;
   String get document => throw _privateConstructorUsedError;
+  String get createdAt => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -50,10 +51,11 @@ abstract class $ClientModelCopyWith<$Res> {
       String company,
       String notes,
       String phone_number,
-      String status,
+      int status,
       String reminder,
       String recording,
-      String document});
+      String document,
+      String createdAt});
 }
 
 /// @nodoc
@@ -79,6 +81,7 @@ class _$ClientModelCopyWithImpl<$Res, $Val extends ClientModel>
     Object? reminder = null,
     Object? recording = null,
     Object? document = null,
+    Object? createdAt = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -108,7 +111,7 @@ class _$ClientModelCopyWithImpl<$Res, $Val extends ClientModel>
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
-              as String,
+              as int,
       reminder: null == reminder
           ? _value.reminder
           : reminder // ignore: cast_nullable_to_non_nullable
@@ -120,6 +123,10 @@ class _$ClientModelCopyWithImpl<$Res, $Val extends ClientModel>
       document: null == document
           ? _value.document
           : document // ignore: cast_nullable_to_non_nullable
+              as String,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
               as String,
     ) as $Val);
   }
@@ -140,10 +147,11 @@ abstract class _$$ClientModelImplCopyWith<$Res>
       String company,
       String notes,
       String phone_number,
-      String status,
+      int status,
       String reminder,
       String recording,
-      String document});
+      String document,
+      String createdAt});
 }
 
 /// @nodoc
@@ -167,6 +175,7 @@ class __$$ClientModelImplCopyWithImpl<$Res>
     Object? reminder = null,
     Object? recording = null,
     Object? document = null,
+    Object? createdAt = null,
   }) {
     return _then(_$ClientModelImpl(
       id: null == id
@@ -196,7 +205,7 @@ class __$$ClientModelImplCopyWithImpl<$Res>
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
-              as String,
+              as int,
       reminder: null == reminder
           ? _value.reminder
           : reminder // ignore: cast_nullable_to_non_nullable
@@ -208,6 +217,10 @@ class __$$ClientModelImplCopyWithImpl<$Res>
       document: null == document
           ? _value.document
           : document // ignore: cast_nullable_to_non_nullable
+              as String,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
               as String,
     ));
   }
@@ -223,10 +236,11 @@ class _$ClientModelImpl implements _ClientModel {
       this.company = "",
       this.notes = "",
       this.phone_number = "",
-      this.status = "",
+      this.status = 0,
       this.reminder = "",
       this.recording = "",
-      this.document = ""});
+      this.document = "",
+      this.createdAt = ""});
 
   factory _$ClientModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ClientModelImplFromJson(json);
@@ -249,7 +263,7 @@ class _$ClientModelImpl implements _ClientModel {
   final String phone_number;
   @override
   @JsonKey()
-  final String status;
+  final int status;
   @override
   @JsonKey()
   final String reminder;
@@ -259,10 +273,13 @@ class _$ClientModelImpl implements _ClientModel {
   @override
   @JsonKey()
   final String document;
+  @override
+  @JsonKey()
+  final String createdAt;
 
   @override
   String toString() {
-    return 'ClientModel(id: $id, name: $name, position: $position, company: $company, notes: $notes, phone_number: $phone_number, status: $status, reminder: $reminder, recording: $recording, document: $document)';
+    return 'ClientModel(id: $id, name: $name, position: $position, company: $company, notes: $notes, phone_number: $phone_number, status: $status, reminder: $reminder, recording: $recording, document: $document, createdAt: $createdAt)';
   }
 
   @override
@@ -284,13 +301,15 @@ class _$ClientModelImpl implements _ClientModel {
             (identical(other.recording, recording) ||
                 other.recording == recording) &&
             (identical(other.document, document) ||
-                other.document == document));
+                other.document == document) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, name, position, company,
-      notes, phone_number, status, reminder, recording, document);
+      notes, phone_number, status, reminder, recording, document, createdAt);
 
   @JsonKey(ignore: true)
   @override
@@ -314,10 +333,11 @@ abstract class _ClientModel implements ClientModel {
       final String company,
       final String notes,
       final String phone_number,
-      final String status,
+      final int status,
       final String reminder,
       final String recording,
-      final String document}) = _$ClientModelImpl;
+      final String document,
+      final String createdAt}) = _$ClientModelImpl;
 
   factory _ClientModel.fromJson(Map<String, dynamic> json) =
       _$ClientModelImpl.fromJson;
@@ -335,13 +355,15 @@ abstract class _ClientModel implements ClientModel {
   @override
   String get phone_number;
   @override
-  String get status;
+  int get status;
   @override
   String get reminder;
   @override
   String get recording;
   @override
   String get document;
+  @override
+  String get createdAt;
   @override
   @JsonKey(ignore: true)
   _$$ClientModelImplCopyWith<_$ClientModelImpl> get copyWith =>

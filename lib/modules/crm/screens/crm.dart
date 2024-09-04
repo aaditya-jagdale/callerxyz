@@ -1,29 +1,41 @@
+import 'package:callerxyz/crm_riverpod.dart';
 import 'package:callerxyz/modules/crm/models/client_model.dart';
+import 'package:callerxyz/modules/crm/screens/client_details.dart';
 import 'package:callerxyz/modules/crm/widgets/crm_list_tile.dart';
+import 'package:callerxyz/modules/shared/widgets/colors.dart';
+import 'package:callerxyz/modules/shared/widgets/transitions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class CRM extends StatefulWidget {
+class CRM extends ConsumerStatefulWidget {
   const CRM({super.key});
 
   @override
-  State<CRM> createState() => _CRMState();
+  ConsumerState<CRM> createState() => _CRMState();
 }
 
-class _CRMState extends State<CRM> {
+class _CRMState extends ConsumerState<CRM> {
   final supabase = Supabase.instance.client;
   bool _isLoading = true;
-  List<ClientModel> clients = [];
+  bool _isSorting = false;
 
   getCrmData() async {
+    setState(() {
+      _isLoading = true;
+    });
     await supabase
         .from('crm')
         .select('*')
         .eq('uid', supabase.auth.currentUser!.id)
+        .order('createdAt', ascending: false)
         .then((response) {
+      ref
+          .read(clientsProvider.notifier)
+          .setClients(response.map((e) => ClientModel.fromJson(e)).toList());
       setState(() {
-        clients = response.map((e) => ClientModel.fromJson(e)).toList();
         _isLoading = false;
       });
     });
@@ -38,6 +50,28 @@ class _CRMState extends State<CRM> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: CustomColors.black,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(100),
+        ),
+        onPressed: () {
+          rightSlideTransition(
+            context,
+            const ClientDetails(
+              isNewClient: true,
+              client: ClientModel(
+                id: -1,
+                name: "",
+              ),
+            ),
+          );
+        },
+        child: Icon(
+          Icons.add,
+          color: CustomColors.white,
+        ),
+      ),
       appBar: AppBar(
         automaticallyImplyLeading: true,
         titleSpacing: 0,
@@ -49,8 +83,19 @@ class _CRMState extends State<CRM> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.filter_list),
+            onPressed: () {
+              setState(() {
+                if (_isSorting) {
+                  ref.read(clientsProvider.notifier).sortByName();
+                } else {
+                  ref.read(clientsProvider.notifier).sortByCreatedAt();
+                }
+                _isSorting = !_isSorting;
+              });
+            },
+            icon: _isSorting
+                ? SvgPicture.asset("assets/filter_alphabetical.svg")
+                : SvgPicture.asset("assets/filter.svg"),
           ),
         ],
       ),
@@ -73,17 +118,16 @@ class _CRMState extends State<CRM> {
                 ),
               ),
             )
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: clients.length,
-                    itemBuilder: (context, index) {
-                      return CrmListTile(client: clients[index]);
-                    },
-                  ),
-                ),
-              ],
+          : RefreshIndicator(
+              onRefresh: () => getCrmData(),
+              child: ListView.builder(
+                itemCount: ref.watch(clientsProvider).length,
+                itemBuilder: (context, index) {
+                  return CrmListTile(
+                    client: ref.watch(clientsProvider)[index],
+                  );
+                },
+              ),
             ),
     );
   }

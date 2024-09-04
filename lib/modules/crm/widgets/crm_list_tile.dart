@@ -15,7 +15,10 @@ class CrmListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        rightSlideTransition(context, ClientDetails(client: client));
+        rightSlideTransition(
+          context,
+          ClientDetails(client: client),
+        );
       },
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -31,7 +34,7 @@ class CrmListTile extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 fontSize: 20,
               ),
             ),

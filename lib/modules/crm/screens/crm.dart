@@ -1,14 +1,14 @@
 import 'package:callerxyz/crm_riverpod.dart';
 import 'package:callerxyz/modules/crm/models/client_model.dart';
-import 'package:callerxyz/modules/crm/screens/client_details.dart';
 import 'package:callerxyz/modules/crm/widgets/crm_list_tile.dart';
+import 'package:callerxyz/modules/local_notifications.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
-import 'package:callerxyz/modules/shared/widgets/transitions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class CRM extends ConsumerStatefulWidget {
   const CRM({super.key});
@@ -56,16 +56,21 @@ class _CRMState extends ConsumerState<CRM> {
           borderRadius: BorderRadius.circular(100),
         ),
         onPressed: () {
-          rightSlideTransition(
-            context,
-            const ClientDetails(
-              isNewClient: true,
-              client: ClientModel(
-                id: -1,
-                name: "",
-              ),
-            ),
+          LocalNotifications.showScheduleNotification(
+            title: "Caller XYZ",
+            body: "Fuck you at 12:12",
+            payload: "lmao",
           );
+          // rightSlideTransition(
+          //   context,
+          //   const ClientDetails(
+          //     isNewClient: true,
+          //     client: ClientModel(
+          //       id: -1,
+          //       name: "",
+          //     ),
+          //   ),
+          // );
         },
         child: Icon(
           Icons.add,

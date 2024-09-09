@@ -194,8 +194,6 @@ class _RecordDetailsState extends ConsumerState<RecordDetails> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(
-        "--------------------------------------${ref.read(recordDataController).date}");
     return Scaffold(
       appBar: _loading
           ? null

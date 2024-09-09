@@ -35,9 +35,8 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
       "date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
     }).then((value) {
       getUserRecord();
-      debugPrint("----------------new record created");
     }).catchError((error) {
-      debugPrint("----------------error creating record: $error");
+      debugPrint("------error creating record: $error");
     });
   }
 
@@ -50,7 +49,6 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
         .select("*")
         .order('date')
         .then((results) {
-      debugPrint("----------------results: $results");
       if (results.isEmpty) {
         createTodayRecord();
       } else {
@@ -68,7 +66,6 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
       });
     }).onError((error, stackTrace) {
       errorSnackBar(context, "Error fetching records");
-      debugPrint("----------------error fetching records: $error");
       setState(() {
         _loading = false;
       });
@@ -265,7 +262,7 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: 5, // Arbitrary number of shimmer tiles
+            itemCount: 5,
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
@@ -287,7 +284,7 @@ class _YourRecordSectionState extends ConsumerState<YourRecordSection> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: min(ref.watch(yourRecordsProvider).records.length, 10),
+            itemCount: min(ref.watch(yourRecordsProvider).records.length, 3),
             itemBuilder: (context, index) {
               final record = ref.watch(yourRecordsProvider).records[index];
               return RecordCard(record: record);

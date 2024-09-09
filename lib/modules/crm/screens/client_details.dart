@@ -31,6 +31,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
   final supabase = Supabase.instance.client;
   final notesController = TextEditingController();
   String? nameError;
+  bool delete = false;
   String selectedPosition = "";
   String selectedCompany = "";
   String selectedStatus = "";
@@ -61,7 +62,8 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
     );
   }
 
-  customTextbottomSheet({Function()? onTap, required bool? isPhone}) {
+  customTextbottomSheet(
+      {Function()? onTap, required bool? isPhone, required String title}) {
     showModalBottomSheet(
       context: context,
       isDismissible: true,
@@ -80,7 +82,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
               children: [
                 CustomTextField(
                   controller: bottomSheetTextController,
-                  title: "Enter Updated Value",
+                  title: title,
                   keyboardType:
                       isPhone! ? TextInputType.phone : TextInputType.text,
                 ),
@@ -148,6 +150,18 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
             pickedTime.minute,
           );
         });
+        customTextbottomSheet(
+          isPhone: false,
+          title: "Add Reminder",
+          onTap: () {
+            // LocalNotifications.showScheduleNotification(
+            //   title: "Client Reminder!",
+            //   body: bottomSheetTextController.text.trim(),
+            //   payload: "Client Reminder!",
+            // );
+            Navigator.pop(context);
+          },
+        );
       }
     }
   }
@@ -308,6 +322,47 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
     }
   }
 
+  deleteClient() {
+    supabase.from('crm').delete().eq("id", widget.client.id).then((value) {
+      delete = true;
+      ref.read(clientsProvider.notifier).removeClient(widget.client.id);
+      if (mounted) {
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+  deleteConfirmationPopup() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: Text("Delete Client"),
+        content: Text("Are you sure you want to delete this client?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              deleteClient();
+            },
+            child: Text(
+              "Delete",
+              style: TextStyle(color: CustomColors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     nameController.text = widget.client.name;
@@ -338,10 +393,12 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
         if (didPop) {
           return;
         }
-        if (widget.isNewClient) {
-          await addNewClient();
-        } else {
-          await uploadData();
+        if (!delete) {
+          if (widget.isNewClient) {
+            await addNewClient();
+          } else {
+            await uploadData();
+          }
         }
       },
       child: Scaffold(
@@ -349,6 +406,39 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
         appBar: AppBar(
           automaticallyImplyLeading: true,
           backgroundColor: CustomColors.white,
+          actions: [
+            IconButton(
+              onPressed: () {
+                showMenu(
+                  color: CustomColors.white,
+                  context: context,
+                  position: const RelativeRect.fromLTRB(100, 90, 15, 0),
+                  items: [
+                    PopupMenuItem(
+                      onTap: () => deleteConfirmationPopup(),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.delete_outline,
+                            color: CustomColors.red,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Delete",
+                            style: TextStyle(
+                              color: CustomColors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                );
+              },
+              icon: const Icon(Icons.more_vert),
+            ),
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -374,6 +464,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                       placeholder: "Position",
                       title: selectedPosition,
                       onTap: () => customTextbottomSheet(
+                        title: "Enter Position",
                         isPhone: false,
                         onTap: () {
                           setState(() {
@@ -384,6 +475,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                         },
                       ),
                       onLongPress: () => customTextbottomSheet(
+                        title: "Enter Position",
                         isPhone: false,
                         onTap: () {
                           setState(() {
@@ -400,6 +492,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                       title: selectedCompany,
                       onTap: () {
                         customTextbottomSheet(
+                          title: "Enter Company",
                           isPhone: false,
                           onTap: () {
                             setState(() {
@@ -411,6 +504,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                         );
                       },
                       onLongPress: () => customTextbottomSheet(
+                        title: "Enter Company",
                         isPhone: false,
                         onTap: () {
                           setState(() {
@@ -446,6 +540,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                       onTap: () {
                         if (selectedNumber.isEmpty) {
                           customTextbottomSheet(
+                            title: "Enter Phone Number",
                             isPhone: true,
                             onTap: () {
                               setState(() {
@@ -462,6 +557,7 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                         }
                       },
                       onLongPress: () => customTextbottomSheet(
+                        title: "Enter Phone Number",
                         isPhone: true,
                         onTap: () {
                           setState(() {
@@ -472,14 +568,14 @@ class _ClientDetailsState extends ConsumerState<ClientDetails> {
                         },
                       ),
                     ),
-                    ClientDetailsListTile(
-                      icon: SvgPicture.asset("assets/recording.svg"),
-                      placeholder: "Add call recording",
-                    ),
-                    ClientDetailsListTile(
-                      icon: SvgPicture.asset("assets/attachment.svg"),
-                      placeholder: "Add a document",
-                    ),
+                    // ClientDetailsListTile(
+                    //   icon: SvgPicture.asset("assets/recording.svg"),
+                    //   placeholder: "Add call recording",
+                    // ),
+                    // ClientDetailsListTile(
+                    //   icon: SvgPicture.asset("assets/attachment.svg"),
+                    //   placeholder: "Add a document",
+                    // ),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 6),
                       child: DottedLine(

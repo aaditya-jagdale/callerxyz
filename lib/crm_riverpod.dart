@@ -22,8 +22,8 @@ class ClientsNotifier extends StateNotifier<List<ClientModel>> {
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
-  void removeClient(ClientModel client) {
-    state = state.where((c) => c.id != client.id).toList();
+  void removeClient(int clientid) {
+    state = state.where((c) => c.id != clientid).toList();
   }
 
   void updateClient(ClientModel updatedClient) {

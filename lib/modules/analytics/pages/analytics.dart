@@ -124,12 +124,6 @@ class _AnalyticsState extends ConsumerState<Analytics> {
             (record.connected / record.dialed * 100).toDouble()))
         .toList();
 
-    debugPrint("-------------------------totalDialed: $dialedList");
-    debugPrint("-------------------------totalConnected: $connectedList");
-    debugPrint("-------------------------totalMeetings: $meetingList");
-    debugPrint("-------------------------totalConversions: $conversionsList");
-    debugPrint(
-        "-------------------------totalDialToConnected: ${dialToConnectList.length}");
 
     setState(() {
       dialed = dialedList;

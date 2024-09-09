@@ -7,11 +7,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp();
+  tz.initializeTimeZones();
   // await FirebaseMessaging.instance.requestPermission();
   // await FirebaseMessaging.instance.getToken();
   await LocalNotifications.init();
@@ -26,7 +28,6 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  
   Widget build(BuildContext context) {
     final supabase = Supabase.instance.client;
     return ProviderScope(

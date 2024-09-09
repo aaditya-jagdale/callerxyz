@@ -3,12 +3,15 @@ import 'package:callerxyz/modules/crm/screens/crm.dart';
 import 'package:callerxyz/modules/home/screens/calendar_view.dart';
 import 'package:callerxyz/modules/home/screens/profile_page.dart';
 import 'package:callerxyz/modules/home/screens/your_records.dart';
+import 'package:callerxyz/modules/local_notifications.dart';
 import 'package:callerxyz/modules/shared/widgets/transitions.dart';
 import 'package:callerxyz/riverpod/fcm_init.dart';
 import 'package:callerxyz/modules/shared/screens/user_info.dart';
 import 'package:callerxyz/modules/shared/widgets/colors.dart';
 import 'package:callerxyz/riverpod/records_riverpod.dart';
+import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -23,6 +26,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final supabase = Supabase.instance.client;
+  List<PendingNotificationRequest> pendingNotifications = [];
+  List<PendingNotificationRequest> activeNotifications = [];
 
   Future<Map<String, dynamic>> getDeviceInfo() async {
     final deviceInfoPlugin = DeviceInfoPlugin();
@@ -67,8 +72,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     //ensure init
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (widget.checkUser) checkUser();
+      pendingNotifications = await LocalNotifications.getPendingNotifications();
       updateFcmToken();
     });
   }
@@ -170,7 +176,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      body: const Padding(
+      body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: SingleChildScrollView(
           child: Column(
@@ -180,7 +186,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               CallendarView(),
               SizedBox(height: 20),
               YourRecordSection(),
-              SizedBox(height: 20),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 6),
+                child: DottedLine(
+                  dashColor: CustomColors.black50,
+                  dashGapLength: 4,
+                  dashLength: 4,
+                  lineThickness: 1,
+                  dashRadius: 0,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      setState(() {
+                        LocalNotifications.getPendingNotifications()
+                            .then((list) => pendingNotifications = list);
+                      });
+                    },
+                    icon: Icon(Icons.refresh),
+                  ),
+                  Text("${pendingNotifications.length} pending notifications"),
+                  const Spacer(),
+                  TextButton(
+                      onPressed: () {
+                        setState(() {
+                          DateTime time =
+                              DateTime.now().add(Duration(seconds: 5));
+                          LocalNotifications.showSimpleNotification(
+                            title: time.toString(),
+                            body: "This is new notification",
+                            payload: "",
+                          );
+                          LocalNotifications.scheduleNotification(
+                            id: 10,
+                            title: time.toString(),
+                            body: "This is scheduled notification",
+                            scheduleTime: time,
+                          );
+                        });
+                      },
+                      child: Text("Add new")),
+                ],
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: pendingNotifications.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title:
+                        Text(pendingNotifications[index].title ?? "no title"),
+                    subtitle:
+                        Text(pendingNotifications[index].body ?? "no body"),
+                    onTap: () {
+                      setState(() {
+                        LocalNotifications.cancelAll();
+                      });
+                    },
+                  );
+                },
+              )
             ],
           ),
         ),

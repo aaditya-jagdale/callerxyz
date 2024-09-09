@@ -196,58 +196,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   dashRadius: 0,
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      setState(() {
-                        LocalNotifications.getPendingNotifications()
-                            .then((list) => pendingNotifications = list);
-                      });
-                    },
-                    icon: Icon(Icons.refresh),
-                  ),
-                  Text("${pendingNotifications.length} pending notifications"),
-                  const Spacer(),
-                  TextButton(
-                      onPressed: () {
-                        setState(() {
-                          DateTime time =
-                              DateTime.now().add(Duration(seconds: 5));
-                          LocalNotifications.showSimpleNotification(
-                            title: time.toString(),
-                            body: "This is new notification",
-                            payload: "",
-                          );
-                          LocalNotifications.scheduleNotification(
-                            id: 10,
-                            title: time.toString(),
-                            body: "This is scheduled notification",
-                            scheduleTime: time,
-                          );
-                        });
-                      },
-                      child: Text("Add new")),
-                ],
-              ),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: pendingNotifications.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title:
-                        Text(pendingNotifications[index].title ?? "no title"),
-                    subtitle:
-                        Text(pendingNotifications[index].body ?? "no body"),
-                    onTap: () {
-                      setState(() {
-                        LocalNotifications.cancelAll();
-                      });
-                    },
-                  );
-                },
-              )
             ],
           ),
         ),

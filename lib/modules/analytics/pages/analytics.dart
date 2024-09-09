@@ -124,7 +124,6 @@ class _AnalyticsState extends ConsumerState<Analytics> {
             (record.connected / record.dialed * 100).toDouble()))
         .toList();
 
-
     setState(() {
       dialed = dialedList;
       connected = connectedList;
@@ -281,17 +280,11 @@ class _AnalyticsState extends ConsumerState<Analytics> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: GridView(
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, mainAxisSpacing: 10, crossAxisSpacing: 10),
               children: [
-                const Text(
-                  "Track Record",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
                 TrackRecordTile(title: "Dialed", value: totalDialed),
                 TrackRecordTile(title: "Connected", value: totalConnected),
                 TrackRecordTile(title: "Meetings", value: totalMeetings),

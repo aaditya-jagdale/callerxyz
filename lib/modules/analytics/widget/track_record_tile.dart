@@ -18,21 +18,20 @@ class TrackRecordTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: CustomColors.black10,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(title, style: const TextStyle(fontSize: 16)),
           Text(
             formatInt(value),
             style: const TextStyle(
-              fontSize: 32,
+              fontSize: 36,
               fontWeight: FontWeight.bold,
             ),
           ),
